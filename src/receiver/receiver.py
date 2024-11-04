@@ -4,7 +4,7 @@ from typing import List
 from injector import inject, singleton
 
 from src.utils.annotations import Service
-from src.receiver.data_sources_handlers.data_source_handler_template import DataSourceHandler
+from src.receiver.data_sources_handlers.data_source_handler import DataSourceHandler
 
 
 class Observer(ABC):
