@@ -3,19 +3,19 @@ import logging
 
 from watchdog.observers import Observer
 
-from src.receiver.data_sources_handlers.data_source_handler_template import DataSourceHandlerTemplate
+from src.receiver.data_sources_handlers.data_source_handler_template import DataSourceHandler
 
 prod_logger = logging.getLogger("production")
 dev_logger = logging.getLogger("development")
 
 
-class FileDataSourceHandler(DataSourceHandlerTemplate):
+class FileDataSourceHandler(DataSourceHandler):
     def __init__(self, folder_to_monitor):
         super().__init__()
         self.folder_to_monitor = folder_to_monitor
         self.observer = Observer()
-        self.observer.schedule(self.fetch_data, folder_to_monitor, recursive=False)
-        atexit.register(self.shutdown_observer)
+        self.observer.schedule(self.handle, folder_to_monitor, recursive=False)
+        atexit.register(self.stop)
 
     def start(self):
         try:
