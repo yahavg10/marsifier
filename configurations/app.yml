@@ -1,6 +1,7 @@
 receivers:
   file:
     folder_to_monitor: "/home/yahav/images"
+
 databases:
   redis:
     host: '20.54.253.55'
@@ -8,8 +9,13 @@ databases:
     db: 0
 
 sender:
-  invoker:
-    api_url: "http://4.180.218.18:8000/merge-files/"
+  file_invoker:
+    endpoint: "http://4.180.218.18:8000/merge-files/"
+    folder_path:
+    common_name:
+    method: "POST"
+    suffixes: [ "_a.jpg", "_b" ]
+
 
 pipeline:
   folder_path: "/home/yahav/images"
