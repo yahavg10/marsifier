@@ -10,25 +10,16 @@ class Observer(ABC):
     def update(self, data):
         raise NotImplementedError
 
+
 @singleton
 @Service
 class Receiver:
     @inject
-    def __init__(self, data_handler):
-        self.data_handler = data_handler
-        self._observers = []
+    def __init__(self, data_source_handlers):
+        self.data_handlers = data_source_handlers
 
-    def register_observer(self, observer):
-        self._observers.append(observer)
+    def register_observer(self, data_source_handler):
+        self.data_handlers.append(data_source_handler)
 
-    def remove_observer(self, observer):
-        self._observers.remove(observer)
-
-    def notify_observers(self, data):
-        for observer in self._observers:
-            observer.update(data)
-
-    def receive_data(self):
-        data = self.data_handler.fetch_data()
-        print("Receiver: Data received:", data)
-        self.notify_observers(data)  # Notify all observers when new data is received
+    def remove_handlers(self, data_source_handler):
+        self.data_handlers.remove(data_source_handler)
