@@ -13,14 +13,3 @@ def Inject(dependency_name):
         return func
 
     return decorator
-
-
-def Observer(subject_name):
-    """Decorator to mark a class as an observer for a specific subject."""
-
-    def decorator(cls):
-        cls._is_observer = True
-        cls._subject_name = subject_name
-        return cls
-
-    return decorator
