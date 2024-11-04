@@ -4,6 +4,8 @@ from src.utils.pool import PoolFactory
 
 
 class DataSourceHandler(ABC):
+    strategy_pool = None
+
     def __init__(self):
         self.strategy_pool = PoolFactory.create_pool_strategy()
 
