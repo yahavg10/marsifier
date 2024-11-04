@@ -1,15 +1,16 @@
-import importlib
-import inspect
 import logging
-import os
-from typing import Dict
 
+from injector import singleton
+
+from src.utils.annotations import Service
 from src.utils.function_utils import object_functions_getter
 
 prod_logger = logging.getLogger("production")
 dev_logger = logging.getLogger("development")
 
 
+@singleton
+@Service
 class DataBase:
     def __init__(self, databases_directory):
         self.databases = object_functions_getter(databases_directory)
