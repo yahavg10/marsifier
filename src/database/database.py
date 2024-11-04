@@ -28,7 +28,7 @@ class DataBase:
             for db in self.databases.values():
                 db.disconnect()
 
-    def fetch_data(self, key, database_name=None):
+    def fetch(self, key, database_name=None):
         db = self.databases.get(database_name) if database_name else None
         if db:
             db.fetch(key)
@@ -40,11 +40,11 @@ class DataBase:
                 all_data[name] = db.fetch_data(key)
             return all_data
 
-    def write_data(self, data, database_name=None):
+    def write(self, database_name=None, **kwargs):
         db = self.databases.get(database_name) if database_name else None
         if db:
-            db.write(data)
+            db.write(kwargs)
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
         for db in self.databases.values():
-            db.write_data(data)
+            db.write_data(kwargs[db.__class__.__name__])

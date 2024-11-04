@@ -3,7 +3,7 @@ import logging
 
 from watchdog.observers import Observer
 
-from src.receiver.data_sources_handlers.data_source_handler_template import DataSourceHandler
+from src.receiver.data_sources_handlers.data_source_handler import DataSourceHandler
 
 prod_logger = logging.getLogger("production")
 dev_logger = logging.getLogger("development")
