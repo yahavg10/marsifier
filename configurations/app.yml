@@ -1,6 +1,10 @@
 receivers:
   file:
-    folder_to_monitor: "/home/yahav/images"
+    path:
+      model_name: "FileHandler"
+      model_path: "components.handler.image_matcher_handler.handler"
+    conf:
+      folder_to_monitor: "C:/Users/nadav/Desktop/all_images"
 
 databases:
   redis:
@@ -11,7 +15,7 @@ databases:
 sender:
   file_invoker:
     endpoint: "http://4.180.218.18:8000/merge-files/"
-    folder_path: "/home/yahav/images"
+    folder_path: "C:/Users/nadav/Desktop/all_images"
     method: "POST"
     suffixes: [ "_a.jpg", "_b" ]
 

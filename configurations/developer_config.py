@@ -25,3 +25,5 @@ pipeline_steps = [
         "config": {"folder_path": app_config.sender["receivers"]["file"]["folder_to_monitor"]}
     }
 ]
+
+receivers = {"file": FileDataSourceHandler}
