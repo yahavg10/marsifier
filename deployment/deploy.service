@@ -1,0 +1,13 @@
+[Unit]
+Description=Cloudy Server Service
+After=network.target
+
+[Service]
+Type=simple
+User=yahav
+WorkingDirectory=/home/yahav/marsifier
+ExecStart=/bin/bash -c 'source /home/yahav/marsifier/myenv/bin/activate && python3 /home/yahav/marsifier/main.py'
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
