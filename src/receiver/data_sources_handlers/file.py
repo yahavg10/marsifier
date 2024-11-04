@@ -1,6 +1,5 @@
 import atexit
 import logging
-from typing import NoReturn
 
 from watchdog.observers import Observer
 
@@ -18,12 +17,7 @@ class FileDataSourceHandler(DataSourceHandlerTemplate):
         self.observer.schedule(self.fetch_data, folder_to_monitor, recursive=False)
         atexit.register(self.shutdown_observer)
 
-    def fetch_data(self):
-        super().get_strategy_pool().pool.submit(self.pipeline_executor.process,
-                                                         kwargs={})
-        return {"data": "sample file data"}
-
-    def start_observer(self) -> NoReturn:
+    def start(self):
         try:
             self.observer.start()
             self.observer.join()
@@ -34,8 +28,13 @@ class FileDataSourceHandler(DataSourceHandlerTemplate):
             self.observer.stop()
             prod_logger.error(str(e))
 
-    def shutdown_observer(self, observer):
+    def stop(self):
         if self.observer.is_alive():
             self.observer.stop()
             self.observer.join()
             dev_logger.info("Observer has been shut down cleanly.")
+
+    def handle(self):
+        super().get_strategy_pool().pool.submit(self.pipeline_executor.process,
+                                                kwargs={})
+        return {"data": "sample file data"}

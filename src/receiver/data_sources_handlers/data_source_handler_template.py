@@ -11,5 +11,13 @@ class DataSourceHandler(ABC):
         return self.strategy_pool
 
     @abstractmethod
-    def fetch_data(self):
+    def handle(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def start(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def stop(self):
         raise NotImplementedError
