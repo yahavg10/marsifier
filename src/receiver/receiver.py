@@ -3,7 +3,7 @@ from typing import List
 
 from injector import inject, singleton
 
-from src.annotations import Service
+from src.utils.annotations import Service
 from src.receiver.data_sources_handlers.data_source_handler_template import DataSourceHandler
 
 
