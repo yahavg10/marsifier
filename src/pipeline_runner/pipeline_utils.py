@@ -3,17 +3,22 @@ import os
 from threading import Lock
 from typing import NoReturn, List
 
+from configurations.developer_config import app_config
+from main import container
+
 db_lock = Lock()
 
-logger = logging.getLogger(name="finals_logger")
+prod_logger = logging.getLogger("production")
+dev_logger = logging.getLogger("development")
 
 
-def delete_from_db(orchestrator, common_name: str, suffix: str) -> NoReturn:
+def delete_from_db(common_name: str, suffix: str, database_name: str = None) -> NoReturn:
     try:
-        orchestrator.database.db_instance.get(common_name) and orchestrator.database.delete(key=common_name)
-        logger.info(f"Cleaned up {common_name + suffix}")
+        container.database.fetch(common_name) and container.database.delete(key=common_name,
+                                                                            database_name=database_name)
+        dev_logger.info(f"Cleaned up {common_name + suffix}")
     except Exception as e:
-        logger.error(f"Error cleaning up files: {str(e)}")
+        prod_logger.warning(f"Error cleaning up files: {str(e)}")
 
 
 def delete_all_united_files(common_name: str, orchestrator, suffixes) -> NoReturn:
@@ -36,21 +41,6 @@ def get_united_name(file_name: str, suffixes: List[str]) -> str:
     return common_name
 
 
-fetch = lambda orchestrator, common_name, suffix: (
-    orchestrator.sender.send_request(orchestrator.configuration.components.sender["api_url"],
-                                     orchestrator.configuration.components.pipeline_executor["folder_path"],
-                                     common_name),
-    delete_all_united_files(common_name, orchestrator)
-)
-
-store = lambda orchestrator, common_name, suffix: (
-    orchestrator.database.store(kwargs={"key": common_name,
-                                        "expiry": orchestrator.configuration.components.pipeline_executor[
-                                            "expiry_delay"],
-                                        "value": f"{orchestrator.configuration.components.pipeline_executor['folder_path']}/{common_name}{suffix}"}),
-)
-
-
 def scan_existing_files(orchestrator) -> NoReturn:
     folder_path = orchestrator.configuration.components.pipeline_executor["folder_path"]
 
@@ -59,22 +49,22 @@ def scan_existing_files(orchestrator) -> NoReturn:
         if os.path.isfile(fpath):
             return True
         else:
-            logger.warning(f"File failed filter (not a file): {file_path}")
+            dev_logger.warning(f"File failed filter (not a file): {file_path}")
             return False
 
     valid_files = filter(is_valid_file, os.listdir(folder_path))
 
     for valid_file in valid_files:
         file_path = os.path.join(folder_path, valid_file).replace("\\", "/")
-        logger.info(f"Processing file: {file_path}")
+        dev_logger.info(f"Processing file: {file_path}")
         orchestrator.pipeline_executor.strategy_pool.pool.submit(orchestrator.pipeline_executor.process,
                                                                  kwargs={'event_type': None, 'src_path': file_path})
 
 
-def process_by_existence(orchestrator, common_name: str, suffix: str) -> NoReturn:
+def process_by_existence(common_name: str) -> NoReturn:
     with db_lock:
-        exists_in_db = orchestrator.database.db_instance.get(common_name)
+        exists_in_db = container.database.fetch(database_name="redis", key=common_name)
         if exists_in_db is not None:
-            fetch(orchestrator, common_name, suffix)
+            fetch(common_name)
         else:
-            store(orchestrator, common_name, suffix)
+            store(common_name)

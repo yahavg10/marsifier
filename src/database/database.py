@@ -1,16 +1,12 @@
 import logging
+from typing import Any
 
-from injector import singleton
-
-from src.utils.annotations import Service
 from src.utils.function_utils import object_functions_getter
 
 prod_logger = logging.getLogger("production")
 dev_logger = logging.getLogger("development")
 
 
-@singleton
-@Service
 class DataBase:
     def __init__(self, databases_directory):
         self.databases = object_functions_getter(databases_directory)
@@ -22,41 +18,51 @@ class DataBase:
     def connect(self, database_name=None):
         db = self.databases.get(database_name) if database_name else None
         if db:
-            db.get("connect")()
+            db.connect()
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
-        if not db:
+        if not database_name:
             for db in self.databases.values():
-                db.get("connect")()
+                db.connect()
 
     def disconnect(self, database_name=None):
         db = self.databases.get(database_name) if database_name else None
         if db:
-            db.get("disconnect")()
+            db.disconnect()
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
-        if not db:
+        if not database_name:
             for db in self.databases.values():
-                db.get("disconnect")()
+                db.disconnect()
 
     def fetch(self, key, database_name=None):
         db = self.databases.get(database_name) if database_name else None
         if db:
-            db.get("fetch")(key)
+            db.fetch(key)
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
-        if not db:
+        if not database_name:
             all_data = {}
-            for db_name, db in self.databases.items():
-                all_data[db_name] = db.get("fetch")(key)
+            for name, db in self.databases.items():
+                all_data[name] = db.fetch_data(key)
             return all_data
 
     def write(self, database_name=None, **kwargs):
         db = self.databases.get(database_name) if database_name else None
         if db:
-            db.get("write")(kwargs)
+            db.write(kwargs)
+        else:
+            dev_logger.error(f"Database '{database_name}' not found.")
+            if not database_name:
+                for db_name, db in self.databases.items():
+                    db.get("write")(kwargs[db_name.replace("_handler", "")])
+
+    def delete(self, key: Any, database_name=None):
+        db = self.databases.get(database_name) if database_name else None
+        if db:
+            db.get("delete")(key)
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
         if not database_name:
             for db_name, db in self.databases.items():
-                db.get("write")(kwargs[db_name.replace("_handler", "")])
+                db.get("delete")(key)
