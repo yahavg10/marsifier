@@ -18,44 +18,44 @@ class DataBase:
     def connect(self, database_name=None):
         db = self.databases.get(database_name) if database_name else None
         if db:
-            db.connect()
+            db.get("connect")()
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
         if not database_name:
             for db in self.databases.values():
-                db.connect()
+                db.get("connect")()
 
     def disconnect(self, database_name=None):
         db = self.databases.get(database_name) if database_name else None
         if db:
-            db.disconnect()
+            db.get("disconnect")()
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
         if not database_name:
             for db in self.databases.values():
-                db.disconnect()
+                db.get("disconnect")()
 
     def fetch(self, key, database_name=None):
         db = self.databases.get(database_name) if database_name else None
         if db:
-            db.fetch(key)
+            db.get("fetch")(key)
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
         if not database_name:
             all_data = {}
             for name, db in self.databases.items():
-                all_data[name] = db.fetch_data(key)
+                all_data[name] = db.get("fetch")(key)
             return all_data
 
     def write(self, database_name=None, **kwargs):
         db = self.databases.get(database_name) if database_name else None
         if db:
-            db.write(kwargs)
+            db.get("write")(**kwargs)
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
-            if not database_name:
-                for db_name, db in self.databases.items():
-                    db.get("write")(kwargs[db_name.replace("_handler", "")])
+        if not database_name:
+            for db in self.databases.values():
+                db.get("write")(**kwargs)
 
     def delete(self, key: Any, database_name=None):
         db = self.databases.get(database_name) if database_name else None

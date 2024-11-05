@@ -21,12 +21,12 @@ def setup(config: Dict[str, Any]):
     instance_mutable_data["db"] = config["db"]
 
 
-def write(**kwargs):
+def write(key, expiry, value):
     try:
-        get_instance_connection().setex(kwargs["key"], kwargs["expiry"], kwargs["value"])
+        get_instance_connection().setex(key, expiry, value)
     except Exception as e:
         dev_logger.warning(str(e))
-    dev_logger.debug(f"Stored {kwargs['value']} in Redis with key {kwargs['key']}")
+    dev_logger.debug(f"Stored {value} in Redis with key {key}")
 
 
 connect = lambda: get_instance_connection()

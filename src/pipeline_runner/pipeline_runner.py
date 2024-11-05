@@ -33,4 +33,4 @@ class PipelineRunner:
                 print(f"Error in {step_name}: {e}")
                 raise
 
-        print(reduce(iterator, self.steps, data))
+        return reduce(iterator, self.steps, data)
