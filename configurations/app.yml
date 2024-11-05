@@ -1,21 +1,26 @@
 receivers:
   file:
-    folder_to_monitor: "/home/yahav/images"
+    path:
+      model_name: "FileDataSourceHandler"
+      model_path: "src.receiver.data_sources_handlers.file_handler"
+    conf:
+      folder_to_monitor: "C:/Users/nadav/Desktop/all_images"
 
 databases:
-  redis:
-    host: '20.54.253.55'
-    port: 6379
-    db: 0
+  types:
+    redis:
+      host: '20.54.253.55'
+      port: 6379
+      db: 0
+  directory: "src/database/databases_handlers"
+
 
 sender:
   file_invoker:
     endpoint: "http://4.180.218.18:8000/merge-files/"
-    folder_path:
-    common_name:
+    folder_path: "C:/Users/nadav/Desktop/all_images"
     method: "POST"
     suffixes: [ "_a.jpg", "_b" ]
-
 
 pipeline:
   folder_path: "/home/yahav/images"

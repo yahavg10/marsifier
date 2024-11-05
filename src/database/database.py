@@ -17,7 +17,7 @@ class DataBase:
 
     def setup_all_databases(self, databases_config):
         for db_name, db in self.databases.items():
-            db.get("setup")(databases_config[db_name])
+            db.get("setup")(databases_config[db_name.replace("_handler", "")])
 
     def connect(self, database_name=None):
         db = self.databases.get(database_name) if database_name else None
@@ -57,5 +57,6 @@ class DataBase:
             db.get("write")(kwargs)
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
-        for db_name, db in self.databases.items():
-            db.get("write")(kwargs[db_name])
+        if not database_name:
+            for db_name, db in self.databases.items():
+                db.get("write")(kwargs[db_name.replace("_handler", "")])
