@@ -7,12 +7,12 @@ receivers:
       folder_to_monitor: "C:/Users/nadav/Desktop/all_images"
 
 databases:
+  directory: "src/database/databases_handlers"
   types:
     redis:
       host: '20.54.253.55'
       port: 6379
       db: 0
-  directory: "src/database/databases_handlers"
 
 
 sender:
@@ -25,6 +25,8 @@ sender:
 pipeline:
   folder_path: "/home/yahav/images"
   expiry_delay: 60
+  config_module: "configurations.developer_config"
+  steps_module: "src.pipeline_runner.pipeline_utils"
 
 pool:
   max_workers: 500

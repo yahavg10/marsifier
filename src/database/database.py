@@ -1,19 +1,27 @@
 import logging
 from typing import Any
 
+from injector import singleton
+
+from configurations.developer_config import container
+from src.utils.annotations import Service, Inject
 from src.utils.function_utils import object_functions_getter
 
 prod_logger = logging.getLogger("production")
 dev_logger = logging.getLogger("development")
 
 
+@singleton
+@Service
 class DataBase:
     def __init__(self, databases_directory):
         self.databases = object_functions_getter(databases_directory)
 
-    def setup_all_databases(self, databases_config):
+    @Inject("AppConfig")
+    def setup_all_databases(self):
+        conf = container.inject_dependencies(self.setup_all_databases).databases["types"]
         for db_name, db in self.databases.items():
-            db.get("setup")(databases_config[db_name.replace("_handler", "")])
+            db.get("setup")(conf[db_name])
 
     def connect(self, database_name=None):
         db = self.databases.get(database_name) if database_name else None

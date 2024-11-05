@@ -2,7 +2,13 @@ import importlib
 from typing import List, Callable, Dict, Any
 from functools import reduce
 
+from injector import singleton
 
+from src.utils.annotations import Service, Inject
+
+
+@singleton
+@Service
 class PipelineRunner:
     def __init__(self, config_module: str, steps_module: str):
         self.config_module = config_module
@@ -18,6 +24,7 @@ class PipelineRunner:
         steps_module = importlib.import_module(self.steps_module)
         return {name: func for name, func in vars(steps_module).items() if callable(func)}
 
+    @Inject("")
     def run_pipeline(self, data: str) -> str:
         def iterator(accumulated_data, step):
             step_name = step['name']

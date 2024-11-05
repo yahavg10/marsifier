@@ -14,14 +14,14 @@ handlers:
     console:
         class: logging.StreamHandler
         level: DEBUG
-        formatter: simple
+        formatter: dev
         stream: ext://sys.stdout
 
     general:
         class: logging.handlers.TimedRotatingFileHandler
         level: INFO
         formatter: prod
-        filename: general.log
+        filename: logs/general.log
         when: midnight
         interval: 1
         backupCount: 7
@@ -30,7 +30,7 @@ handlers:
         class: logging.handlers.TimedRotatingFileHandler
         level: WARNING
         formatter: prod
-        filename: error.log
+        filename: logs/error.log
         when: midnight
         interval: 1
         backupCount: 7

@@ -1,9 +1,6 @@
-import yaml
+from src.container import IoCContainer
 
-from configurations.config_models.app_model import AppConfig
-from src.utils.file_utils import load_configuration
-
-app_config = load_configuration(AppConfig, yaml.safe_load)
+container = IoCContainer()
 
 database_functions_template = ("get_instance_connection", "setup",
                                "connect", "disconnect",
@@ -17,7 +14,6 @@ pipeline_steps = [
     },
     {
         "name": "get_united_name",
-        "config": {"suffixes": app_config.sender["file_invoker"]["suffixes"]}
     }
 ]
 #     {

@@ -3,8 +3,8 @@ import os
 from threading import Lock
 from typing import NoReturn, List
 
-from configurations.developer_config import app_config
-from main import container
+from configurations.developer_config import container
+from src.utils.annotations import Inject
 
 db_lock = Lock()
 
@@ -31,11 +31,13 @@ def determine_part(file_name: str, suffixes) -> str:
     return next((suffix for suffix in suffixes if suffix in file_name), "unknown_part")
 
 
-def get_file_name(event) -> str:
-    return os.path.basename(event.replace('\\', '/'))
+def get_file_name(src_path) -> str:
+    return os.path.basename(src_path.replace('\\', '/'))
 
 
-def get_united_name(file_name: str, suffixes: List[str]) -> str:
+@Inject("AppConfig")
+def get_united_name(file_name: str) -> str:
+    suffixes = container.inject_dependencies(get_united_name).sender["file_invoker"]["suffixes"]
     common_name = file_name.replace(next((suffix for suffix in suffixes if suffix in file_name), ""), "") \
         .replace(".jpg", "")
     return common_name
@@ -61,9 +63,11 @@ def scan_existing_files(orchestrator) -> NoReturn:
                                                                  kwargs={'event_type': None, 'src_path': file_path})
 
 
+@Inject("DataBase")
 def process_by_existence(common_name: str) -> NoReturn:
+    database = container.inject_dependencies(process_by_existence)
     with db_lock:
-        exists_in_db = container.database.fetch(database_name="redis", key=common_name)
+        exists_in_db = database.fetch(database_name="redis", key=common_name)
         if exists_in_db is not None:
             fetch(common_name)
         else:

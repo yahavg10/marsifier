@@ -2,26 +2,31 @@ import logging
 from dataclasses import dataclass, is_dataclass, fields
 from typing import Type, Dict, Any
 
+from injector import singleton
 from pydantic.types import T
+
+from src.utils.annotations import Service
 
 logger = logging.getLogger(name="finals_logger")
 
 
+# @dataclass
+# class Singleton:
+#     _instance = None
+#
+#     def __new__(cls: Type["Singleton"], *args, **kwargs):
+#         if cls._instance is None:
+#             cls._instance = super().__new__(cls)
+#         return cls._instance
+#
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+
+
+@singleton
+@Service
 @dataclass
-class Singleton:
-    _instance = None
-
-    def __new__(cls: Type["Singleton"], *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
-@dataclass
-class AppConfig(Singleton):
+class AppConfig:
     receivers: Dict[str, Any]
     databases: Dict[str, Any]
     sender: Dict[str, Any]
