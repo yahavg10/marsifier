@@ -33,7 +33,7 @@ class FileDataSourceHandler(DataSourceHandler):
             self.observer.join()
             dev_logger.info("Observer has been shut down cleanly.")
 
-    def handle(self):
-        super().get_strategy_pool().pool.submit(self.pipeline.process,
-                                                kwargs={})
+    def handle(self, event):
+        # super().get_strategy_pool().pool.submit(container.pipeline.run_pipeline,
+        #                                         kwargs={})
         return {"data": "sample file data"}

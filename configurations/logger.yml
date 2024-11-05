@@ -2,9 +2,13 @@ version: 1
 disable_existing_loggers: False
 
 formatters:
-    simple:
-        format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    dev:
+        format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s [%(module)s:%(lineno)d]'
         datefmt: '%Y-%m-%d %H:%M:%S'
+    prod:
+        format: '%(asctime)s - %(levelname)s - %(message)s'
+        datefmt: '%Y-%m-%d %H:%M:%S'
+
 
 handlers:
     console:
@@ -13,13 +17,22 @@ handlers:
         formatter: simple
         stream: ext://sys.stdout
 
-    file:
+    general:
         class: logging.handlers.TimedRotatingFileHandler
         level: INFO
-        formatter: simple
-        filename: myapp.log
+        formatter: prod
+        filename: general.log
         when: midnight
-        interval: 1     # Every 1 day
+        interval: 1
+        backupCount: 7
+
+    errors:
+        class: logging.handlers.TimedRotatingFileHandler
+        level: WARNING
+        formatter: prod
+        filename: error.log
+        when: midnight
+        interval: 1
         backupCount: 7
 
 loggers:
@@ -29,6 +42,6 @@ loggers:
         propagate: no
 
     production:
-        level: WARNING
-        handlers: [file]
+        level: INFO
+        handlers: [ general, errors ]
         propagate: no

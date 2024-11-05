@@ -15,7 +15,7 @@ class DataSourceHandler(ABC):
         return self.strategy_pool
 
     @abstractmethod
-    def handle(self):
+    def handle(self, event):
         raise NotImplementedError
 
     @abstractmethod
