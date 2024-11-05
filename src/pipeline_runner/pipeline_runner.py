@@ -22,12 +22,15 @@ class PipelineRunner:
         def iterator(accumulated_data, step):
             step_name = step['name']
             func = self.step_functions[step_name]
-            config = step.get('config', {})
+            config = step.get('config', None)
             try:
                 print(f"Running {step_name}")
-                return func(accumulated_data, config)
+                if config:
+                    return func(accumulated_data, config)
+                else:
+                    return func(accumulated_data)
             except Exception as e:
                 print(f"Error in {step_name}: {e}")
                 raise
 
-        return reduce(iterator, self.steps, data)
+        print(reduce(iterator, self.steps, data))

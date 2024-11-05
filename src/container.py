@@ -15,8 +15,8 @@ class IoCContainer:
     def configure(self):
         self.receiver = Receiver(self.get_receivers())
         self.database = DataBase(self.config.databases.get("directory"))
-        # self.pipeline = PipelineRunner(config_module="configurations.developer_config",
-        #                                             steps_module="src.pipeline_runner.pipeline_utils.py")
+        self.pipeline = PipelineRunner(config_module="configurations.developer_config",
+                                                    steps_module="src.pipeline_runner.pipeline_utils")
 
     def get_receivers(self):
         receivers = {}

@@ -13,15 +13,16 @@ file_read_mode = "rb"
 
 pipeline_steps = [
     {
-        "name": "get_file_name",
-        "config": {"src_path": "value1"}
-    },
-    {
-        "name": "get_united_name",
-        "config": {"suffixes": app_config.sender["file_invoker"]["suffixes"]}
-    },
-    {
-        "name": "process_by_existence",
-        "config": {"folder_path": app_config.receivers["file"]["conf"]["folder_to_monitor"]}
+        "name": "get_file_name"
     }
 ]
+
+# ,
+#     {
+#         "name": "get_united_name",
+#         "config": {"suffixes": app_config.sender["file_invoker"]["suffixes"]}
+#     },
+#     {
+#         "name": "process_by_existence",
+#         "config": {"folder_path": app_config.receivers["file"]["conf"]["folder_to_monitor"]}
+#     }

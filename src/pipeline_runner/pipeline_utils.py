@@ -8,7 +8,7 @@ db_lock = Lock()
 logger = logging.getLogger(name="finals_logger")
 
 
-def delete_from_db(common_name: str, orchestrator: Orchestrator, suffix: str) -> NoReturn:
+def delete_from_db(orchestrator, common_name: str, suffix: str) -> NoReturn:
     try:
         orchestrator.database.db_instance.get(common_name) and orchestrator.database.delete(key=common_name)
         logger.info(f"Cleaned up {common_name + suffix}")
@@ -16,13 +16,13 @@ def delete_from_db(common_name: str, orchestrator: Orchestrator, suffix: str) ->
         logger.error(f"Error cleaning up files: {str(e)}")
 
 
-def delete_all_united_files(common_name: str, orchestrator: Orchestrator) -> NoReturn:
+def delete_all_united_files(common_name: str, orchestrator, suffixes) -> NoReturn:
     file_path = orchestrator.configuration.components.pipeline_executor["folder_path"] + "/" + common_name
     [os.remove(file_path + suffix) and delete_from_db(common_name, orchestrator, suffix) for suffix in suffixes if
      os.path.exists(file_path + suffix)]
 
 
-def determine_part(file_name: str) -> str:
+def determine_part(file_name: str, suffixes) -> str:
     return next((suffix for suffix in suffixes if suffix in file_name), "unknown_part")
 
 
@@ -51,7 +51,7 @@ store = lambda orchestrator, common_name, suffix: (
 )
 
 
-def scan_existing_files(orchestrator: Orchestrator) -> NoReturn:
+def scan_existing_files(orchestrator) -> NoReturn:
     folder_path = orchestrator.configuration.components.pipeline_executor["folder_path"]
 
     def is_valid_file(file_name: str) -> bool:
@@ -71,7 +71,7 @@ def scan_existing_files(orchestrator: Orchestrator) -> NoReturn:
                                                                  kwargs={'event_type': None, 'src_path': file_path})
 
 
-def process_by_existence(orchestrator: Orchestrator, common_name: str, suffix: str) -> NoReturn:
+def process_by_existence(orchestrator, common_name: str, suffix: str) -> NoReturn:
     with db_lock:
         exists_in_db = orchestrator.database.db_instance.get(common_name)
         if exists_in_db is not None:
