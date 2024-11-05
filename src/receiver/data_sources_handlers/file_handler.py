@@ -20,7 +20,6 @@ class FileDataSourceHandler(DataSourceHandler):
     def start(self):
         try:
             self.observer.start()
-            self.observer.join()
         except KeyboardInterrupt:
             self.observer.stop()
             dev_logger.info("Monitoring stopped due to user interruption.")

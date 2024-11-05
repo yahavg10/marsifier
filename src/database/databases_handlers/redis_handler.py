@@ -16,10 +16,9 @@ def get_instance_connection():
 
 
 def setup(config: Dict[str, Any]):
-    instance_mutable_data.update("host", config["host"])
-    instance_mutable_data.update("port", config["port"])
-    instance_mutable_data.update("db", config["db"])
-    instance_mutable_data.update("decode_response", config["decode_response"])
+    instance_mutable_data["host"] = config["host"]
+    instance_mutable_data["port"] = config["port"]
+    instance_mutable_data["db"] = config["db"]
 
 
 def connect():
@@ -30,12 +29,15 @@ def disconnect():
     get_instance_connection().close()
 
 
-def write(**kwargs):
-    try:
-        get_instance_connection().setex(kwargs["key"], kwargs["expiry"], kwargs["value"])
-    except Exception as e:
-        dev_logger.warning(str(e))
-    dev_logger.debug(f"Stored {kwargs['value']} in Redis with key {kwargs['key']}")
+write = lambda kwargs: (get_instance_connection().setex(kwargs["key"], kwargs["expiry"], kwargs["value"]))
+
+
+# def write(**kwargs):
+#     try:
+#         get_instance_connection().setex(kwargs["key"], kwargs["expiry"], kwargs["value"])
+#     except Exception as e:
+#         dev_logger.warning(str(e))
+#     dev_logger.debug(f"Stored {kwargs['value']} in Redis with key {kwargs['key']}")
 
 
 def fetch(key: str) -> str:

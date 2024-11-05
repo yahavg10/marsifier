@@ -11,7 +11,7 @@ from configurations.developer_config import database_functions_template
 def check_functions_template(database_functions: List):
     missing_params = [param for param in database_functions_template if
                       param not in database_functions]
-    return missing_params.count() != 0
+    return len(missing_params) != 0
 
 
 def object_functions_getter(directory: str):
@@ -30,14 +30,13 @@ def object_functions_getter(directory: str):
 
 def import_dynamic_model(class_model_config):
     try:
-        module = importlib.import_module(class_model_config.model_path)
-        dynamic_class = getattr(module, class_model_config.model_name)
+        module = importlib.import_module(class_model_config["model_path"])
+        dynamic_class = getattr(module, class_model_config['model_name'])
         return dynamic_class
     except AttributeError as e:
         dev_logger.warning(
-            f"class '{class_model_config.model_name}' "
-            f"not found in module "
-            f"'{class_model_config.model_name}'.")
+            f"class {class_model_config['model_name']} not found"
+                           f" in module {class_model_config['model_name']}")
         raise e
     except Exception as e:
         dev_logger.error(e)

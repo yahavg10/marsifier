@@ -1,16 +1,19 @@
 receivers:
   file:
     path:
-      model_name: "FileHandler"
-      model_path: "components.handler.image_matcher_handler.handler"
+      model_name: "FileDataSourceHandler"
+      model_path: "src.receiver.data_sources_handlers.file_handler"
     conf:
       folder_to_monitor: "C:/Users/nadav/Desktop/all_images"
 
 databases:
-  redis:
-    host: '20.54.253.55'
-    port: 6379
-    db: 0
+  types:
+    redis:
+      host: '20.54.253.55'
+      port: 6379
+      db: 0
+  directory: "src/database/databases_handlers"
+
 
 sender:
   file_invoker:

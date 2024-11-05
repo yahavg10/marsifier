@@ -22,8 +22,6 @@ pipeline_steps = [
     },
     {
         "name": "process_by_existence",
-        "config": {"folder_path": app_config.sender["receivers"]["file"]["folder_to_monitor"]}
+        "config": {"folder_path": app_config.receivers["file"]["conf"]["folder_to_monitor"]}
     }
 ]
-
-receivers = {"file": FileDataSourceHandler}
