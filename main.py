@@ -10,7 +10,11 @@ from orchestrator.orchestrator_builder import OrchestratorBuilder
 from utils.logger_utils import setup_custom_logger
 from utils.observe import create_observer, start_observer
 
+container = IoCContainer(app_config)
+container.configure()
 
+
+<<<<<<< Updated upstream
 def configure_orchestrator_builder() -> NoReturn:
     builder = OrchestratorBuilder()
     return (
@@ -39,6 +43,16 @@ def main() -> NoReturn:
 
     scan_existing_files(orchestrator)
     start_observer(observer)
+=======
+def main():
+    setup_logger()
+    container.database.setup_all_databases(app_config.databases["types"])
+    container.database.write(database_name="redis_handler",
+                             key="test",
+                             expiry=60,
+                             value="test_value")
+    container.pipeline.run_pipeline("C:/Users/nadav/Desktop/all_images/image12_a.jpg")
+>>>>>>> Stashed changes
 
 
 if __name__ == "__main__":
