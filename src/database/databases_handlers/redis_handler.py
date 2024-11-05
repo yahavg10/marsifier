@@ -45,3 +45,7 @@ def fetch(key: str) -> str:
 def delete(key: str):
     get_instance_connection().delete(key)
     dev_logger.info(f"Deleted Redis key {key}")
+
+
+def exists(key: str):
+    return get_instance_connection().exists(key)
