@@ -21,29 +21,20 @@ def setup(config: Dict[str, Any]):
     instance_mutable_data["db"] = config["db"]
 
 
-def connect():
-    get_instance_connection()
+def write(**kwargs):
+    try:
+        get_instance_connection().setex(kwargs["key"], kwargs["expiry"], kwargs["value"])
+    except Exception as e:
+        dev_logger.warning(str(e))
+    dev_logger.debug(f"Stored {kwargs['value']} in Redis with key {kwargs['key']}")
 
 
-def disconnect():
-    get_instance_connection().close()
+connect = lambda: get_instance_connection()
 
+disconnect = lambda: get_instance_connection().close()
 
-write = lambda kwargs: (get_instance_connection().setex(kwargs["key"], kwargs["expiry"], kwargs["value"]))
+delete = lambda key: get_instance_connection().delete(key)
 
+fetch = lambda key: get_instance_connection().get(key)
 
-# def write(**kwargs):
-#     try:
-#         get_instance_connection().setex(kwargs["key"], kwargs["expiry"], kwargs["value"])
-#     except Exception as e:
-#         dev_logger.warning(str(e))
-#     dev_logger.debug(f"Stored {kwargs['value']} in Redis with key {kwargs['key']}")
-
-
-def fetch(key: str) -> str:
-    return get_instance_connection().get(key)
-
-
-def delete(key: str):
-    get_instance_connection().delete(key)
-    dev_logger.info(f"Deleted Redis key {key}")
+exists = lambda key: get_instance_connection().exists(key)
