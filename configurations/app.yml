@@ -1,14 +1,26 @@
-components:
-  database:
+receivers:
+  file:
+    folder_to_monitor: "/home/yahav/images"
+
+databases:
+  redis:
     host: '20.54.253.55'
     port: 6379
     db: 0
 
-  sender:
-    api_url: "http://4.180.218.18:8000/merge-files/"
+sender:
+  file_invoker:
+    endpoint: "http://4.180.218.18:8000/merge-files/"
+    folder_path:
+    common_name:
+    method: "POST"
+    suffixes: [ "_a.jpg", "_b" ]
 
-  pipeline_executor:
-    folder_path: "/home/yahav/images"
-    expiry_delay: 60
-    max_workers: 500
-    handling_way: "multithread"
+
+pipeline:
+  folder_path: "/home/yahav/images"
+  expiry_delay: 60
+
+pool:
+  max_workers: 500
+  handling_way: "multithread"

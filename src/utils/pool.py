@@ -1,8 +1,9 @@
+from abc import ABC
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from typing import Callable, Any
 
 
-class PoolStrategy:
+class PoolStrategy(ABC):
     def submit(self, fn: Callable, *args, **kwargs) -> Any:
         raise NotImplementedError("Submit method should be implemented.")
 
