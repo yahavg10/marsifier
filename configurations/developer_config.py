@@ -7,7 +7,7 @@ app_config = load_configuration(AppConfig, yaml.safe_load)
 
 database_functions_template = ("get_instance_connection", "setup",
                                "connect", "disconnect",
-                               "write", "fetch", "delete")
+                               "write", "fetch", "delete", "exists")
 
 file_read_mode = "rb"
 

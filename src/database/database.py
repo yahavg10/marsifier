@@ -15,7 +15,7 @@ class DataBase:
             db.connect()
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
-        if not db:
+        if not database_name:
             for db in self.databases.values():
                 db.connect()
 
@@ -25,7 +25,7 @@ class DataBase:
             db.disconnect()
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
-        if not db:
+        if not database_name:
             for db in self.databases.values():
                 db.disconnect()
 
@@ -35,7 +35,7 @@ class DataBase:
             db.fetch(key)
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
-        if not db:
+        if not database_name:
             all_data = {}
             for name, db in self.databases.items():
                 all_data[name] = db.fetch_data(key)
@@ -47,13 +47,9 @@ class DataBase:
             db.write(kwargs)
         else:
             dev_logger.error(f"Database '{database_name}' not found.")
-<<<<<<< Updated upstream
-        for db in self.databases.values():
-            db.write_data(kwargs[db.__class__.__name__])
-=======
-        if not database_name:
-            for db_name, db in self.databases.items():
-                db.get("write")(kwargs[db_name.replace("_handler", "")])
+            if not database_name:
+                for db_name, db in self.databases.items():
+                    db.get("write")(kwargs[db_name.replace("_handler", "")])
 
     def delete(self, key: Any, database_name=None):
         db = self.databases.get(database_name) if database_name else None
@@ -64,4 +60,3 @@ class DataBase:
         if not database_name:
             for db_name, db in self.databases.items():
                 db.get("delete")(key)
->>>>>>> Stashed changes
