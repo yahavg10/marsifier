@@ -43,9 +43,9 @@ class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
 
     @Inject("PipelineRunner")
     def on_created(self, event):
-        pipeline = container.inject_dependencies(self.handle)
+        pipeline = container.inject_dependencies(self.on_created)
         super().get_strategy_pool().pool.submit(pipeline.run_pipeline,
-                                                kwargs={'event_type': event.event_type, 'src_path': event.src_path})
+                                                data=event.src_path)
 
     def handle(self, event):
         pass

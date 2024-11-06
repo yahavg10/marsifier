@@ -1,10 +1,13 @@
 import importlib
-from typing import List, Callable, Dict, Any
+import logging
 from functools import reduce
+from typing import List, Callable, Dict, Any
 
 from injector import singleton
 
 from src.utils.annotations import Service, Inject
+
+prod_logger = logging.getLogger("production")
 
 
 @singleton
@@ -24,7 +27,6 @@ class PipelineRunner:
         steps_module = importlib.import_module(self.steps_module)
         return {name: func for name, func in vars(steps_module).items() if callable(func)}
 
-    @Inject("")
     def run_pipeline(self, data: str) -> str:
         def iterator(accumulated_data, step):
             step_name = step['name']
@@ -40,4 +42,4 @@ class PipelineRunner:
                 print(f"Error in {step_name}: {e}")
                 raise
 
-        return reduce(iterator, self.steps, data)
+        prod_logger.info(reduce(iterator, self.steps, data))
