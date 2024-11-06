@@ -6,27 +6,27 @@ from typing import NoReturn, List
 
 from configurations.config_models.app_model import AppConfig
 from configurations.developer_config import strategy_pool
+from src.database.database import DataBase
 from src.pipeline_runner.pipeline_runner import PipelineRunner
 from src.utils.annotations import Inject
 
 db_lock = Lock()
 
-prod_logger = logging.getLogger("production")
-dev_logger = logging.getLogger("development")
+logger = logging.getLogger(os.getenv("ENV"))
 
 
 @Inject("DataBase")
-def delete_from_db(database, common_name: str, suffix: str, database_name: str = None) -> NoReturn:
+def delete_from_db(database: DataBase, common_name: str, suffix: str, database_name: str = None) -> NoReturn:
     try:
         database.fetch(common_name) and database.delete(key=common_name,
                                                         database_name=database_name)
-        dev_logger.info(f"Cleaned up {common_name + suffix}")
+        logger.info(f"Cleaned up {common_name + suffix}")
     except Exception as e:
-        prod_logger.warning(f"Error cleaning up files: {str(e)}")
+        logger.warning(f"Error cleaning up files: {str(e)}")
 
 
 @Inject("AppConfig")
-def delete_all_united_files(app_config, common_name: str) -> NoReturn:
+def delete_all_united_files(app_config: AppConfig, common_name: str) -> NoReturn:
     suffixes = app_config.sender["file_invoker"]["suffixes"]
     file_path = app_config.receivers['file']['conf']['folder_to_monitor'] + "/" + common_name
 
@@ -36,7 +36,7 @@ def delete_all_united_files(app_config, common_name: str) -> NoReturn:
 
 
 @Inject("AppConfig")
-def delete_old_files(app_config):
+def delete_old_files(app_config: AppConfig) -> NoReturn:
     directory = app_config.receivers['file']['conf']['folder_to_monitor']
     age_limit = app_config.receivers['file']['conf']['file_age_limit']
 
@@ -48,24 +48,24 @@ def delete_old_files(app_config):
 
 
 @Inject("AppConfig")
-def determine_part(app_config, file_name: str) -> str:
+def determine_part(app_config: AppConfig, file_name: str) -> str:
     suffixes = app_config.sender["file_invoker"]["suffixes"]
     return next((suffix for suffix in suffixes if suffix in file_name), "unknown_part")
 
 
-def get_file_name(src_path) -> str:
+def get_file_name(src_path:str) -> str:
     return os.path.basename(src_path.replace('\\', '/'))
 
 
 @Inject("AppConfig")
-def get_united_name(app_config, file_name: str) -> str:
+def get_united_name(app_config: AppConfig, file_name: str) -> str:
     suffixes = app_config.sender["file_invoker"]["suffixes"]
     common_name = file_name.replace(next((suffix for suffix in suffixes if suffix in file_name), ""), "") \
         .replace(".jpg", "")
     return common_name
 
 
-def get_valid_files(folder_path: str) -> List:
+def get_valid_files(folder_path: str) -> List[str]:
     return [
         entry for entry in os.listdir(folder_path)
         if os.path.isfile(os.path.join(folder_path, entry))
@@ -74,13 +74,12 @@ def get_valid_files(folder_path: str) -> List:
 
 @Inject("AppConfig", "PipelineRunner")
 def scan_existing_files(app_config: AppConfig, pipeline: PipelineRunner) -> NoReturn:
-
     folder_path = app_config.pipeline["folder_path"]
     valid_files = get_valid_files(folder_path)
 
     for valid_file in valid_files:
         file_path = os.path.join(folder_path, valid_file).replace("\\", "/")
-        dev_logger.info(f"Processing file: {os.path.basename(file_path)}")
+        logger.info(f"Processing file: {os.path.basename(file_path)}")
         time.sleep(1.0)
         strategy_pool.pool.submit(pipeline.run_pipeline,
                                   data=file_path)

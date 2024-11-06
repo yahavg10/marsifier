@@ -2,12 +2,10 @@ import logging
 from dataclasses import dataclass, is_dataclass, fields
 from typing import Type, Dict, Any
 
-from injector import singleton
 from pydantic.types import T
 
 from src.utils.annotations import Service
 
-logger = logging.getLogger(name="finals_logger")
 
 
 @dataclass

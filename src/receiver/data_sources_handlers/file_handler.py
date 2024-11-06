@@ -1,19 +1,21 @@
 import atexit
 import logging
+import os
+from typing import NoReturn
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from configurations.developer_config import container, strategy_pool
+from src.pipeline_runner.pipeline_runner import PipelineRunner
 from src.receiver.data_sources_handlers.data_source_handler import DataSourceHandler
 from src.utils.annotations import Inject
 
-prod_logger = logging.getLogger("production")
-dev_logger = logging.getLogger("development")
+logger = logging.getLogger(os.getenv("ENV"))
 
 
 class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
-    def __init__(self, folder_to_monitor, file_age_limit):
+    def __init__(self, folder_to_monitor: str, file_age_limit: int) -> NoReturn:
         super().__init__()
         container.register_class(self)
         self.folder_to_monitor = folder_to_monitor
@@ -25,24 +27,24 @@ class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
         # Timer(file_age_limit, delete_old_files).start()
         atexit.register(self.stop)
 
-    def start(self):
+    def start(self) -> NoReturn:
         try:
             self.observer.start()
             self.observer.join()
         except KeyboardInterrupt:
             self.observer.stop()
-            dev_logger.info("Monitoring stopped due to user interruption.")
+            logger.info("Monitoring stopped due to user interruption.")
         except Exception as e:
             self.observer.stop()
-            prod_logger.error(str(e))
+            logger.error(str(e))
 
-    def stop(self):
+    def stop(self) -> NoReturn:
         if self.observer.is_alive():
             self.observer.stop()
             self.observer.join()
-            dev_logger.info("Observer has been shut down cleanly.")
+            logger.info("Observer has been shut down cleanly.")
 
     @Inject("PipelineRunner")
-    def on_created(self, pipeline, event):
+    def on_created(self, pipeline: PipelineRunner, event) -> NoReturn:
         strategy_pool.pool.submit(pipeline.run_pipeline,
                                   data=event.src_path)

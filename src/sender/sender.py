@@ -1,24 +1,25 @@
 import logging
+import os
 from typing import NoReturn, Callable
 
 from requests import RequestException
 
-from configurations.developer_config import container, default_send_fn
+from configurations.config_models.app_model import AppConfig
+from configurations.developer_config import default_send_fn
 from src.sender.payload_methods import file_invoker
 from src.utils.annotations import Inject
 
-prod_logger = logging.getLogger(name="production")
-dev_logger = logging.getLogger(name="development")
+logger = logging.getLogger(name=os.getenv("ENV"))
 
 
 @Inject("AppConfig")
-def send(app_config, common_name, sender_type, payload_fn=file_invoker,
+def send(app_config: AppConfig, common_name: str, sender_type: str, payload_fn=file_invoker,
          send_method: Callable = default_send_fn) -> NoReturn:
     try:
         app_config.sender[sender_type].update("common_name", common_name)
-        payload = payload_fn(** app_config.sender[sender_type])
+        payload = payload_fn(**app_config.sender[sender_type])
 
         response = send_method(app_config.sender[sender_type]["endpoint"], json=payload)
-        dev_logger.info(response.json())
+        logger.info(response.json())
     except RequestException as e:
-        prod_logger.error(f"Error during request: {str(e)}")
+        logger.error(f"Error during request: {str(e)}")

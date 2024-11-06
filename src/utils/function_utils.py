@@ -2,23 +2,23 @@ import importlib
 import inspect
 import logging
 import os
-from typing import List, Dict
+from typing import List, Dict, Any
 
 from configurations.config_models.app_model import AppConfig
-from src.container import IoCContainer
+from src.receiver.data_sources_handlers.data_source_handler import DataSourceHandler
 
-dev_logger = logging.getLogger("development")
+logger = logging.getLogger(os.getenv("ENV"))
 
 from configurations.developer_config import database_functions_template
 
 
-def check_functions_template(database_functions: List):
+def check_functions_template(database_functions: List) -> int:
     missing_params = [param for param in database_functions_template if
                       param not in database_functions]
     return len(missing_params) != 0
 
 
-def object_functions_getter(directory: str):
+def object_functions_getter(directory: str) -> Any:
     objects: Dict[str, Dict[str, callable]] = {}
 
     for filename in os.listdir(directory):
@@ -32,26 +32,24 @@ def object_functions_getter(directory: str):
     return objects
 
 
-def import_dynamic_model(class_model_config):
+def import_dynamic_model(class_model_config: str) -> Any:
     try:
         module = importlib.import_module(class_model_config["model_path"])
         dynamic_class = getattr(module, class_model_config['model_name'])
         return dynamic_class
     except AttributeError as e:
-        dev_logger.warning(
+        logger.warning(
             f"class {class_model_config['model_name']} not found"
             f" in module {class_model_config['model_name']}")
         raise e
     except Exception as e:
-        dev_logger.error(e)
+        logger.error(e)
         raise e
 
 
-def get_receivers(config: AppConfig):
+def get_receivers(config: AppConfig) -> Dict[str, DataSourceHandler]:
     receivers = {}
     for receiver_name, receiver_conf in config.receivers.items():
         receiver_model = import_dynamic_model(receiver_conf["path"])
         receivers[receiver_name] = receiver_model(**receiver_conf["conf"])
     return receivers
-
-

@@ -8,4 +8,5 @@ def Inject(*dependency_names):
         func._is_inject = True
         func._dependencies = dependency_names
         return func
+
     return decorator

@@ -1,20 +1,21 @@
 import importlib
 import logging
+import os
 from functools import reduce
-from typing import List, Callable, Dict, Any
+from typing import List, Callable, Dict, Any, NoReturn
 
 from injector import singleton
 
 from configurations.developer_config import container
-from src.utils.annotations import Service, Inject
+from src.utils.annotations import Service
 
-prod_logger = logging.getLogger("production")
+logger = logging.getLogger(os.getenv("ENV"))
 
 
 @singleton
 @Service
 class PipelineRunner:
-    def __init__(self, config_module: str, steps_module: str):
+    def __init__(self, config_module: str, steps_module: str) -> NoReturn:
         self.config_module = config_module
         self.steps_module = steps_module
         self.steps = self.load_steps()
@@ -41,7 +42,7 @@ class PipelineRunner:
                 else:
                     return func(accumulated_data)
             except Exception as e:
-                prod_logger.error(f"Error in {step_name}: {e}")
+                logger.error(f"Error in {step_name}: {e}")
                 raise
 
         reduce(iterator, self.steps, data)
