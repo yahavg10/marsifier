@@ -10,28 +10,26 @@ from src.utils.annotations import Service
 logger = logging.getLogger(name="finals_logger")
 
 
-# @dataclass
-# class Singleton:
-#     _instance = None
-#
-#     def __new__(cls: Type["Singleton"], *args, **kwargs):
-#         if cls._instance is None:
-#             cls._instance = super().__new__(cls)
-#         return cls._instance
-#
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
+@dataclass
+class Singleton:
+    _instance = None
+
+    def __new__(cls: Type["Singleton"], *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
-@singleton
 @Service
 @dataclass
-class AppConfig:
+class AppConfig(Singleton):
     receivers: Dict[str, Any]
     databases: Dict[str, Any]
     sender: Dict[str, Any]
     pipeline: Dict[str, Any]
-    pool: Dict[str, Any]
 
     @staticmethod
     def from_dict(data: dict, cls: Type[T]) -> Type[T]:

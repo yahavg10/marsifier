@@ -12,7 +12,7 @@ class IoCContainer:
             service_name = cls.__name__
 
             service_instance = fn_init(**kwargs) if fn_init else cls(**kwargs)
-            # Wrap methods with @Inject for dependency injection
+
             for attr_name in dir(service_instance):
                 method = getattr(service_instance, attr_name)
 

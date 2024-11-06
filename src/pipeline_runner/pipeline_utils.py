@@ -2,16 +2,17 @@ import logging
 import os
 import time
 from threading import Lock
-from typing import NoReturn
+from typing import NoReturn, List
 
-from configurations.developer_config import container
+from configurations.config_models.app_model import AppConfig
+from configurations.developer_config import strategy_pool
+from src.pipeline_runner.pipeline_runner import PipelineRunner
 from src.utils.annotations import Inject
 
 db_lock = Lock()
 
 prod_logger = logging.getLogger("production")
 dev_logger = logging.getLogger("development")
-container.register_functions_in_module(__name__)
 
 
 @Inject("DataBase")
@@ -64,34 +65,34 @@ def get_united_name(app_config, file_name: str) -> str:
     return common_name
 
 
-def scan_existing_files(orchestrator) -> NoReturn:
-    folder_path = orchestrator.configuration.components.pipeline_executor["folder_path"]
+def get_valid_files(folder_path: str) -> List:
+    return [
+        entry for entry in os.listdir(folder_path)
+        if os.path.isfile(os.path.join(folder_path, entry))
+    ]
 
-    def is_valid_file(file_name: str) -> bool:
-        fpath = os.path.join(folder_path, file_name)
-        if os.path.isfile(fpath):
-            return True
-        else:
-            dev_logger.warning(f"File failed filter (not a file): {file_path}")
-            return False
 
-    valid_files = filter(is_valid_file, os.listdir(folder_path))
-
+@Inject("AppConfig", "PipelineRunner")
+def scan_existing_files(app_config: AppConfig, pipeline: PipelineRunner) -> NoReturn:
+    folder_path = app_config.pipeline["folder_path"]
+    valid_files = get_valid_files(folder_path)
     for valid_file in valid_files:
         file_path = os.path.join(folder_path, valid_file).replace("\\", "/")
         dev_logger.info(f"Processing file: {file_path}")
-        orchestrator.pipeline_executor.strategy_pool.pool.submit(orchestrator.pipeline_executor.process,
-                                                                 kwargs={'event_type': None, 'src_path': file_path})
+        strategy_pool.pool.submit(pipeline.run_pipeline,
+                                  data=file_path)
 
 
-@Inject("AppConfig", "DataBase")
-def process_by_existence(app_config, database, common_name: str) -> NoReturn:
-    prod_logger.error(common_name)
+@Inject("AppConfig", "DataBase", "send")
+def process_by_existence(app_config, database, send_fn, common_name: str) -> NoReturn:
     with db_lock:
         exists_in_db = database.fetch(database_name="redis", key=common_name)
+        print(exists_in_db)
         if exists_in_db is not None:
-            pass
+            send_fn(common_name, "file_invoker")
+            delete_all_united_files(common_name=common_name)
         else:
-            database.store(database_name="redis",
+            database.write(database_name="redis",
                            key=common_name,
+                           value=f"{app_config.pipeline['folder_path']}/{common_name}",
                            expiry=app_config.databases["types"]["redis"]["expiry"])

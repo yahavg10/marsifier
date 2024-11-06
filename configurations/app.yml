@@ -6,8 +6,6 @@ receivers:
     conf:
       folder_to_monitor: "C:/Users/nadav/Desktop/all_images"
       file_age_limit: 1 # in minutes
-      max_workers: 500
-      pool_type: "multithread"
 
 databases:
   directory: "src/database/databases_handlers"
@@ -16,21 +14,16 @@ databases:
       host: '20.54.253.55'
       port: 6379
       db: 0
+      expiry: 60
 
 
 sender:
   file_invoker:
-    endpoint: "http://4.180.218.18:8000/merge-files/"
-    folder_path: "C:/Users/nadav/Desktop/all_images"
-    method: "POST"
-    suffixes: [ "_a.jpg", "_b" ]
+      endpoint: "http://4.180.218.18:8000/merge-files/"
+      folder_path: "C:/Users/nadav/Desktop/all_images"
+      suffixes: [ "_a.jpg", "_b" ]
 
 pipeline:
-  folder_path: "/home/yahav/images"
-  expiry_delay: 60
+  folder_path: "C:/Users/nadav/Desktop/all_images"
   config_module: "configurations.developer_config"
   steps_module: "src.pipeline_runner.pipeline_utils"
-
-pool:
-  max_workers: 500
-  pool_type: "multithread"

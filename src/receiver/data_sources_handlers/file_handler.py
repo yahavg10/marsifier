@@ -1,12 +1,10 @@
 import atexit
 import logging
-from threading import Timer
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-from configurations.developer_config import container
-from src.pipeline_runner.pipeline_utils import delete_old_files
+from configurations.developer_config import container, strategy_pool
 from src.receiver.data_sources_handlers.data_source_handler import DataSourceHandler
 from src.utils.annotations import Inject
 
@@ -15,8 +13,8 @@ dev_logger = logging.getLogger("development")
 
 
 class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
-    def __init__(self, folder_to_monitor, file_age_limit, pool_type: str, max_workers: int):
-        super().__init__(pool_type, max_workers)
+    def __init__(self, folder_to_monitor, file_age_limit):
+        super().__init__()
         container.register_class(self)
         self.folder_to_monitor = folder_to_monitor
         self.file_age_limit = file_age_limit
@@ -44,5 +42,5 @@ class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
 
     @Inject("PipelineRunner")
     def on_created(self, pipeline, event):
-        super().get_strategy_pool().pool.submit(pipeline.run_pipeline,
-                                                data=event.src_path)
+        strategy_pool.pool.submit(pipeline.run_pipeline,
+                                  data=event.src_path)

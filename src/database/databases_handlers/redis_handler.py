@@ -3,6 +3,8 @@ from typing import Any, Dict
 
 import redis
 
+from configurations.developer_config import SerializableType
+
 prod_logger = logging.getLogger("production")
 dev_logger = logging.getLogger("development")
 
@@ -21,7 +23,7 @@ def setup(config: Dict[str, Any]):
     instance_mutable_data["db"] = config["db"]
 
 
-def write(key, expiry, value):
+def write(key: SerializableType, expiry: int, value: SerializableType):
     try:
         get_instance_connection().setex(key, expiry, value)
     except Exception as e:
