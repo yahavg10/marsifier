@@ -15,13 +15,14 @@ dev_logger = logging.getLogger("development")
 
 
 class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
-    def __init__(self, folder_to_monitor, file_age_limit):
-        super().__init__()
+    def __init__(self, folder_to_monitor, file_age_limit, pool_type: str, max_workers: int):
+        super().__init__(pool_type, max_workers)
+        container.register_class(self)
         self.folder_to_monitor = folder_to_monitor
         self.file_age_limit = file_age_limit
         self.observer = Observer()
         self.observer.schedule(self, folder_to_monitor, recursive=False)
-        Timer(file_age_limit, delete_old_files).start()
+        # Timer(file_age_limit, delete_old_files).start()
         atexit.register(self.stop)
 
     def start(self):
@@ -42,10 +43,6 @@ class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
             dev_logger.info("Observer has been shut down cleanly.")
 
     @Inject("PipelineRunner")
-    def on_created(self, event):
-        pipeline = container.inject_dependencies(self.on_created)
+    def on_created(self, pipeline, event):
         super().get_strategy_pool().pool.submit(pipeline.run_pipeline,
                                                 data=event.src_path)
-
-    def handle(self, event):
-        pass

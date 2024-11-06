@@ -18,8 +18,8 @@ class DataBase:
         self.databases = object_functions_getter(databases_directory)
 
     @Inject("AppConfig")
-    def setup_all_databases(self):
-        conf = container.inject_dependencies(self.setup_all_databases).databases["types"]
+    def setup_all_databases(self, app_config):
+        conf = app_config.databases["types"]
         for db_name, db in self.databases.items():
             db.get("setup")(conf[db_name])
 

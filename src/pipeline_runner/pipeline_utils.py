@@ -1,11 +1,9 @@
 import logging
 import os
-import subprocess
 import time
 from threading import Lock
-from typing import NoReturn, List
+from typing import NoReturn
 
-from configurations.developer_config import container
 from src.utils.annotations import Inject
 
 db_lock = Lock()
@@ -14,26 +12,31 @@ prod_logger = logging.getLogger("production")
 dev_logger = logging.getLogger("development")
 
 
-def delete_from_db(common_name: str, suffix: str, database_name: str = None) -> NoReturn:
+@Inject("DataBase")
+def delete_from_db(database, common_name: str, suffix: str, database_name: str = None) -> NoReturn:
     try:
-        container.database.fetch(common_name) and container.database.delete(key=common_name,
-                                                                            database_name=database_name)
+        database.fetch(common_name) and database.delete(key=common_name,
+                                                        database_name=database_name)
         dev_logger.info(f"Cleaned up {common_name + suffix}")
     except Exception as e:
         prod_logger.warning(f"Error cleaning up files: {str(e)}")
 
 
-def delete_all_united_files(common_name: str, orchestrator, suffixes) -> NoReturn:
-    file_path = orchestrator.configuration.components.pipeline_executor["folder_path"] + "/" + common_name
-    [os.remove(file_path + suffix) and delete_from_db(common_name, orchestrator, suffix) for suffix in suffixes if
-     os.path.exists(file_path + suffix)]
+@Inject("AppConfig")
+def delete_all_united_files(app_config, common_name: str) -> NoReturn:
+    suffixes = app_config.sender["file_invoker"]["suffixes"]
+    file_path = app_config.receivers['file']['conf']['folder_to_monitor'] + "/" + common_name
+
+    for suffix in suffixes:
+        if os.path.exists(file_path + suffix):
+            os.remove(file_path + suffix) and delete_from_db(common_name, suffix)
 
 
 @Inject("AppConfig")
-def delete_old_files():
-    app_config = container.inject_dependencies(delete_old_files)
+def delete_old_files(app_config):
     directory = app_config.receivers['file']['conf']['folder_to_monitor']
     age_limit = app_config.receivers['file']['conf']['file_age_limit']
+
     now = time.time()
     for filename in os.listdir(directory):
         file_path = os.path.join(directory, filename)
@@ -41,7 +44,9 @@ def delete_old_files():
             os.remove(file_path)
 
 
-def determine_part(file_name: str, suffixes) -> str:
+@Inject("AppConfig")
+def determine_part(app_config, file_name: str) -> str:
+    suffixes = app_config.sender["file_invoker"]["suffixes"]
     return next((suffix for suffix in suffixes if suffix in file_name), "unknown_part")
 
 
@@ -50,8 +55,8 @@ def get_file_name(src_path) -> str:
 
 
 @Inject("AppConfig")
-def get_united_name(file_name: str) -> str:
-    suffixes = container.inject_dependencies(get_united_name).sender["file_invoker"]["suffixes"]
+def get_united_name(app_config, file_name: str) -> str:
+    suffixes = app_config.sender["file_invoker"]["suffixes"]
     common_name = file_name.replace(next((suffix for suffix in suffixes if suffix in file_name), ""), "") \
         .replace(".jpg", "")
     return common_name
@@ -76,16 +81,14 @@ def scan_existing_files(orchestrator) -> NoReturn:
         orchestrator.pipeline_executor.strategy_pool.pool.submit(orchestrator.pipeline_executor.process,
                                                                  kwargs={'event_type': None, 'src_path': file_path})
 
-@Inject("AppConfig")
-@Inject("DataBase")
-def process_by_existence(common_name: str) -> NoReturn:
-    app_config = container.inject_dependencies(process_by_existence)
-    database = container.inject_dependencies(process_by_existence)
+
+@Inject("AppConfig", "DataBase")
+def process_by_existence(app_config, database, common_name: str) -> NoReturn:
+    prod_logger.error(common_name)
     with db_lock:
         exists_in_db = database.fetch(database_name="redis", key=common_name)
         if exists_in_db is not None:
-            sender.send()
-
+            pass
         else:
             database.store(database_name="redis",
                            key=common_name,

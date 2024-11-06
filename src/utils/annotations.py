@@ -3,10 +3,9 @@ def Service(cls):
     return cls
 
 
-def Inject(dependency_name):
+def Inject(*dependency_names):
     def decorator(func):
         func._is_inject = True
-        func._dependency_name = dependency_name
+        func._dependencies = dependency_names
         return func
-
     return decorator

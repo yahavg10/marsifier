@@ -14,9 +14,8 @@ pipeline_steps = [
     },
     {
         "name": "get_united_name",
+    },
+    {
+        "name": "process_by_existence",
     }
 ]
-#     {
-#         "name": "process_by_existence",
-#         "config": {"folder_path": app_config.receivers["file"]["conf"]["folder_to_monitor"]}
-#     }

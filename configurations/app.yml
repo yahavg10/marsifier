@@ -6,6 +6,8 @@ receivers:
     conf:
       folder_to_monitor: "C:/Users/nadav/Desktop/all_images"
       file_age_limit: 1 # in minutes
+      max_workers: 500
+      pool_type: "multithread"
 
 databases:
   directory: "src/database/databases_handlers"
@@ -31,4 +33,4 @@ pipeline:
 
 pool:
   max_workers: 500
-  handling_way: "multithread"
+  pool_type: "multithread"

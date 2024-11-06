@@ -5,6 +5,7 @@ from typing import List, Callable, Dict, Any
 
 from injector import singleton
 
+from configurations.developer_config import container
 from src.utils.annotations import Service, Inject
 
 prod_logger = logging.getLogger("production")
@@ -33,13 +34,14 @@ class PipelineRunner:
             func = self.step_functions[step_name]
             config = step.get('config', None)
             try:
-                print(f"Running {step_name}")
+                if hasattr(func, "_is_inject") and getattr(func, "_is_inject"):
+                    func = container.get_service(func.__name__)
                 if config:
                     return func(accumulated_data, config)
                 else:
                     return func(accumulated_data)
             except Exception as e:
-                print(f"Error in {step_name}: {e}")
+                prod_logger.error(f"Error in {step_name}: {e}")
                 raise
 
-        prod_logger.info(reduce(iterator, self.steps, data))
+        reduce(iterator, self.steps, data)

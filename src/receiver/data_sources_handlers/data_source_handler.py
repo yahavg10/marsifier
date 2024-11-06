@@ -1,27 +1,16 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
-from configurations.developer_config import container
-from src.utils.annotations import Inject
 from src.utils.pool import PoolFactory
 
 
-class DataSourceHandler(ABC):
+class DataSourceHandler:
     strategy_pool = None
 
-    def __init__(self):
-        @Inject("AppConfig")
-        def set_strategy_pool():
-            app_config = container.inject_dependencies(set_strategy_pool)
-            self.strategy_pool = PoolFactory.create_pool_strategy(pool_type=app_config.pool["handling_way"],
-                                                                  max_workers=app_config.pool["max_workers"])
-        set_strategy_pool()
+    def __init__(self, pool_type, max_workers):
+        self.strategy_pool = PoolFactory.create_pool_strategy(pool_type, max_workers)
 
     def get_strategy_pool(self):
         return self.strategy_pool
-
-    @abstractmethod
-    def handle(self, event):
-        raise NotImplementedError
 
     @abstractmethod
     def start(self):

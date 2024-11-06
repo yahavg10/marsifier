@@ -16,7 +16,6 @@ class Observer(ABC):
 @singleton
 @Service
 class Receiver:
-    @inject
     def __init__(self, data_source_handlers: Dict[str, DataSourceHandler]):
         self.data_handlers = data_source_handlers
 
