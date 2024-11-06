@@ -74,11 +74,14 @@ def get_valid_files(folder_path: str) -> List:
 
 @Inject("AppConfig", "PipelineRunner")
 def scan_existing_files(app_config: AppConfig, pipeline: PipelineRunner) -> NoReturn:
+
     folder_path = app_config.pipeline["folder_path"]
     valid_files = get_valid_files(folder_path)
+
     for valid_file in valid_files:
         file_path = os.path.join(folder_path, valid_file).replace("\\", "/")
-        dev_logger.info(f"Processing file: {file_path}")
+        dev_logger.info(f"Processing file: {os.path.basename(file_path)}")
+        time.sleep(1.0)
         strategy_pool.pool.submit(pipeline.run_pipeline,
                                   data=file_path)
 
@@ -86,7 +89,9 @@ def scan_existing_files(app_config: AppConfig, pipeline: PipelineRunner) -> NoRe
 @Inject("AppConfig", "DataBase", "send")
 def process_by_existence(app_config, database, send_fn, common_name: str) -> NoReturn:
     with db_lock:
+        # db_lock.acquire()
         exists_in_db = database.fetch(database_name="redis", key=common_name)
+        # db_lock.release()
         print(exists_in_db)
         if exists_in_db is not None:
             send_fn(common_name, "file_invoker")

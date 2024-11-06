@@ -5,7 +5,6 @@ from configurations.developer_config import container
 from src.database.database import DataBase
 from src.pipeline_runner import pipeline_utils
 from src.pipeline_runner.pipeline_runner import PipelineRunner
-from src.receiver.data_sources_handlers.data_source_handler import DataSourceHandler
 from src.receiver.receiver import Receiver
 from src.sender import sender
 from src.utils.file_utils import setup_logger, load_configuration
@@ -25,9 +24,9 @@ def initial_register_services():
     container.register(PipelineRunner, config_module=app_config.pipeline["config_module"],
                        steps_module=app_config.pipeline["steps_module"])
 
-    container.register(Receiver, data_source_handlers=get_receivers(app_config))
-
     container.register(DataBase, databases_directory=app_config.databases.get("directory"))
+
+    container.register(Receiver, data_source_handlers=get_receivers(app_config))
 
 
 def main():

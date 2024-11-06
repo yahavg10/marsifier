@@ -3,7 +3,6 @@ from typing import Any
 
 from injector import singleton
 
-from configurations.developer_config import container
 from src.utils.annotations import Service, Inject
 from src.utils.function_utils import object_functions_getter
 

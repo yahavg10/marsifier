@@ -20,6 +20,8 @@ class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
         self.file_age_limit = file_age_limit
         self.observer = Observer()
         self.observer.schedule(self, folder_to_monitor, recursive=False)
+        scan_existing_files = container.get_service("scan_existing_files")
+        scan_existing_files()
         # Timer(file_age_limit, delete_old_files).start()
         atexit.register(self.stop)
 
