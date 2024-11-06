@@ -1,5 +1,7 @@
 import logging
 import os
+import subprocess
+import time
 from threading import Lock
 from typing import NoReturn, List
 
@@ -25,6 +27,18 @@ def delete_all_united_files(common_name: str, orchestrator, suffixes) -> NoRetur
     file_path = orchestrator.configuration.components.pipeline_executor["folder_path"] + "/" + common_name
     [os.remove(file_path + suffix) and delete_from_db(common_name, orchestrator, suffix) for suffix in suffixes if
      os.path.exists(file_path + suffix)]
+
+
+@Inject("AppConfig")
+def delete_old_files():
+    app_config = container.inject_dependencies(delete_old_files)
+    directory = app_config.receivers['file']['conf']['folder_to_monitor']
+    age_limit = app_config.receivers['file']['conf']['file_age_limit']
+    now = time.time()
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        if os.path.isfile(file_path) and now - os.path.getmtime(file_path) > age_limit:
+            os.remove(file_path)
 
 
 def determine_part(file_name: str, suffixes) -> str:
@@ -62,13 +76,17 @@ def scan_existing_files(orchestrator) -> NoReturn:
         orchestrator.pipeline_executor.strategy_pool.pool.submit(orchestrator.pipeline_executor.process,
                                                                  kwargs={'event_type': None, 'src_path': file_path})
 
-
+@Inject("AppConfig")
 @Inject("DataBase")
 def process_by_existence(common_name: str) -> NoReturn:
+    app_config = container.inject_dependencies(process_by_existence)
     database = container.inject_dependencies(process_by_existence)
     with db_lock:
         exists_in_db = database.fetch(database_name="redis", key=common_name)
         if exists_in_db is not None:
-            fetch(common_name)
+            sender.send()
+
         else:
-            store(common_name)
+            database.store(database_name="redis",
+                           key=common_name,
+                           expiry=app_config.databases["types"]["redis"]["expiry"])

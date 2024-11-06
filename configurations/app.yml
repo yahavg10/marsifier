@@ -5,6 +5,7 @@ receivers:
       model_path: "src.receiver.data_sources_handlers.file_handler"
     conf:
       folder_to_monitor: "C:/Users/nadav/Desktop/all_images"
+      file_age_limit: 1 # in minutes
 
 databases:
   directory: "src/database/databases_handlers"

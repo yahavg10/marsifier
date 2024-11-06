@@ -21,13 +21,14 @@ def main():
     container.register(PipelineRunner, config_module=app_config.pipeline["config_module"],
                        steps_module=app_config.pipeline["steps_module"])
 
-    database, pipeline = container.get_services("DataBase", "PipelineRunner")
+    receiver, database, pipeline = container.get_services("Receiver", "DataBase", "PipelineRunner")
 
     database.setup_all_databases()
-    database.write(key=pipeline.run_pipeline("C:/Users/nadav/Desktop/all_images/image12_a.jpg"),
-
-                   expiry=60,
-                   value="test")
+    receiver.start()
+    # database.write(key=pipeline.run_pipeline("C:/Users/nadav/Desktop/all_images/image12_a.jpg"),
+    #
+    #                expiry=60,
+    #                value="test")
 
 
 if __name__ == "__main__":
