@@ -4,12 +4,14 @@ import time
 from threading import Lock
 from typing import NoReturn
 
+from configurations.developer_config import container
 from src.utils.annotations import Inject
 
 db_lock = Lock()
 
 prod_logger = logging.getLogger("production")
 dev_logger = logging.getLogger("development")
+container.register_functions_in_module(__name__)
 
 
 @Inject("DataBase")

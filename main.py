@@ -10,10 +10,8 @@ from src.utils.file_utils import setup_logger, load_configuration
 from src.utils.function_utils import get_receivers
 
 
-def main():
-    setup_logger()
+def initial_register_services():
     app_config = load_configuration(AppConfig, yaml.safe_load)
-    container.register_functions_in_module(pipeline_utils)
 
     container.register(AppConfig, fn_init=load_configuration,
                        config_model=AppConfig,
@@ -26,10 +24,14 @@ def main():
 
     container.register(DataBase, databases_directory=app_config.databases.get("directory"))
 
+
+def main():
+    setup_logger()
+    initial_register_services()
+
     receiver, database, pipeline = container.get_services("Receiver", "DataBase", "PipelineRunner")
 
     database.setup_all_databases()
-    # print(container.services)
     receiver.start()
 
 

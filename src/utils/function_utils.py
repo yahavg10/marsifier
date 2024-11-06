@@ -5,6 +5,7 @@ import os
 from typing import List, Dict
 
 from configurations.config_models.app_model import AppConfig
+from src.container import IoCContainer
 
 dev_logger = logging.getLogger("development")
 
@@ -52,3 +53,5 @@ def get_receivers(config: AppConfig):
         receiver_model = import_dynamic_model(receiver_conf["path"])
         receivers[receiver_name] = receiver_model(**receiver_conf["conf"])
     return receivers
+
+
