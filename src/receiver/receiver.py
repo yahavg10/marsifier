@@ -1,4 +1,5 @@
-from abc import ABC, abstractmethod
+import logging
+import os
 from typing import Dict, NoReturn
 
 from injector import singleton
@@ -6,7 +7,7 @@ from injector import singleton
 from src.receiver.data_sources_handlers.data_source_handler import DataSourceHandler
 from src.utils.annotations import Service
 
-
+logger = logging.getLogger(os.getenv("ENV"))
 
 
 @singleton
@@ -16,6 +17,7 @@ class Receiver:
         self.data_handlers = data_source_handlers
 
     def start(self, specific_handler_name: str = None) -> NoReturn:
+        logger.info("started receiver")
         if specific_handler_name:
             self.data_handlers.get(specific_handler_name).stop()
         for data_handler in self.data_handlers.values():

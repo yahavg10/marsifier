@@ -19,9 +19,11 @@ databases:
 
 sender:
   file_invoker:
-    endpoint: "http://4.180.218.18:8000/merge-files/"
-    folder_path: "C:/Users/nadav/Desktop/all_images"
-    suffixes: [ "_a.jpg", "_b" ]
+    endpoint: "http://172.17.64.1:8000/merge-files/"
+    #    endpoint: "http://4.180.218.18:8000/merge-files/"
+    params:
+      folder_path: "C:/Users/nadav/Desktop/all_images"
+      suffixes: [ "_a.jpg", "_b" ]
 
 pipeline:
   folder_path: "C:/Users/nadav/Desktop/all_images"

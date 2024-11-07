@@ -6,7 +6,7 @@ from src.container import IoCContainer
 from src.utils.pool import PoolFactory
 
 container = IoCContainer()
-strategy_pool = PoolFactory.create_pool_strategy("multithread", 500)
+strategy_pool = PoolFactory.create_pool_strategy("multithread", 3000)
 
 SerializableType = Union[
     int, float, str, bool, None,

@@ -14,12 +14,12 @@ from src.utils.function_utils import get_receivers
 def initial_register_services():
     app_config = load_configuration(AppConfig, yaml.safe_load)
 
+    container.register_functions_in_module(pipeline_utils)
+    container.register_functions_in_module(sender)
+
     container.register(AppConfig, fn_init=load_configuration,
                        config_model=AppConfig,
                        load_conf_fn=yaml.safe_load)
-
-    container.register_functions_in_module(pipeline_utils)
-    container.register_functions_in_module(sender)
 
     container.register(PipelineRunner, config_module=app_config.pipeline["config_module"],
                        steps_module=app_config.pipeline["steps_module"])
@@ -35,8 +35,10 @@ def main():
 
     receiver, database, pipeline = container.get_services("Receiver", "DataBase", "PipelineRunner")
 
-    database.setup_all_databases()
-    receiver.start()
+    try:
+        database.setup_all_databases()
+    finally:
+        receiver.start()
 
 
 if __name__ == "__main__":

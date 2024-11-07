@@ -1,6 +1,7 @@
 import atexit
 import logging
 import os
+from threading import Timer
 from typing import NoReturn
 
 from watchdog.events import FileSystemEventHandler
@@ -8,6 +9,7 @@ from watchdog.observers import Observer
 
 from configurations.developer_config import container, strategy_pool
 from src.pipeline_runner.pipeline_runner import PipelineRunner
+from src.pipeline_runner.pipeline_utils import delete_old_files
 from src.receiver.data_sources_handlers.data_source_handler import DataSourceHandler
 from src.utils.annotations import Inject
 

@@ -2,9 +2,10 @@ import importlib
 import inspect
 import logging
 import os
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Type
 
 from configurations.config_models.app_model import AppConfig
+from src.database.abstract_database import AbstractDbTemplate
 from src.receiver.data_sources_handlers.data_source_handler import DataSourceHandler
 
 logger = logging.getLogger(os.getenv("ENV"))
@@ -18,17 +19,20 @@ def check_functions_template(database_functions: List) -> int:
     return len(missing_params) != 0
 
 
-def object_functions_getter(directory: str) -> Any:
-    objects: Dict[str, Dict[str, callable]] = {}
+def object_classes_getter(config, directory: str, base_class: Type = AbstractDbTemplate)\
+        -> Dict[str, Any]:
+    objects: Dict[str, Any] = {}
 
     for filename in os.listdir(directory):
         if filename.endswith('.py') and filename != '__init__.py':
-            module_name = filename[:-3]  # Remove '_handler.py' extension
+            module_name = filename[:-3]  # Remove '.py' extension
             module = importlib.import_module(f"{directory.replace('/', '.')}.{module_name}")
-            objects[module_name.replace("_handler", "")] = {name: func for name, func in
-                                                            inspect.getmembers(module, inspect.isfunction)}
-            if not check_functions_template(objects[module_name.replace("_handler", "")].values()):
-                objects.pop(module_name)
+
+            for name, cls in inspect.getmembers(module, inspect.isclass):
+                if issubclass(cls, base_class) and cls is not base_class:
+                    instance_name = module_name.replace("_handler", "")
+                    objects[instance_name] = cls(**config["types"][instance_name])
+
     return objects
 
 
