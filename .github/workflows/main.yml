@@ -1,0 +1,22 @@
+name: CD Pipeline for marsifier Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Ansible
+      run: sudo apt update && sudo apt install -y ansible
+
+    - name: Run Ansible Playbook
+      env:
+        ANSIBLE_HOST_KEY_CHECKING: false
+      run: ansible-playbook -i configurations/ansible/inventory.yml configurations/ansible/deploy.yml --extra-vars "user=${{ secrets.SSH_USERNAME }} password=${{ secrets.SSH_PASSWORD }}"
