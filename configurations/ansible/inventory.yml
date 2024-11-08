@@ -3,6 +3,6 @@ all:
     server1:
       ansible_host: 20.54.253.55
   vars:
-    ansible_user: "{{ yahav }}"
+    ansible_user: "{{ user }}"
     ansible_ssh_pass: "{{ Aa1234567890 }}"
     ansible_become: true
