@@ -13,6 +13,7 @@
           - git
           - python3
           - python3-pip
+          - python3-venv
 
       - name: Clone repository if not present
         git:
@@ -27,6 +28,11 @@
           dest: /home/yahav/marsifier
           version: main
           update: yes
+
+      - name: Create virtual environment
+          command: python3 -m venv /home/yahav/marsifier/myenv
+          args:
+            creates: /home/yahav/marsifier/myenv/bin/activate
 
       - name: Install requirements
         pip:
