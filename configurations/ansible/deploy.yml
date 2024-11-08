@@ -30,9 +30,9 @@
           update: yes
 
       - name: Create virtual environment
-          command: python3 -m venv /home/yahav/marsifier/myenv
-          args:
-            creates: /home/yahav/marsifier/myenv/bin/activate
+        command: python3 -m venv /home/yahav/marsifier/myenv
+        args:
+          creates: /home/yahav/marsifier/myenv/bin/activate
 
       - name: Install requirements
         pip:
