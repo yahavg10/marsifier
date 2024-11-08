@@ -22,4 +22,4 @@ def send(app_config: AppConfig, common_name: str, sender_type: str, payload_fn=f
         response = send_method(app_config.sender[sender_type]["endpoint"], files=payload)
         logger.info(response.json())
     except RequestException as e:
-        logger.error(f"Error during request: {str(e)}")
+        logger.warning(f"Error during request: {str(e)}")

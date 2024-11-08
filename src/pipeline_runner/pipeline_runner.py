@@ -42,7 +42,7 @@ class PipelineRunner:
                 else:
                     return func(accumulated_data)
             except Exception as e:
-                logger.error(f"Error in {step_name}: {e}")
+                logger.debug(f"Error in {step_name}: {e}")
                 raise Exception
 
         reduce(iterator, self.steps, data)

@@ -5,7 +5,7 @@ from typing import NoReturn
 from redis import Redis
 
 from configurations.developer_config import SerializableType
-from src.database.abstract_database import AbstractDbTemplate
+from src.database.database_template import AbstractDbTemplate
 
 logger = logging.getLogger(os.getenv("ENV"))
 

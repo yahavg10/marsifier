@@ -5,7 +5,7 @@ import os
 from typing import List, Dict, Any, Type
 
 from configurations.config_models.app_model import AppConfig
-from src.database.abstract_database import AbstractDbTemplate
+from src.database.database_template import AbstractDbTemplate
 from src.receiver.data_sources_handlers.data_source_handler import DataSourceHandler
 
 logger = logging.getLogger(os.getenv("ENV"))
@@ -47,7 +47,7 @@ def import_dynamic_model(class_model_config: str) -> Any:
             f" in module {class_model_config['model_name']}")
         raise e
     except Exception as e:
-        logger.error(e)
+        logger.debug(e)
         raise e
 
 

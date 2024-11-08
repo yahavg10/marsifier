@@ -17,7 +17,7 @@ class Receiver:
         self.data_handlers = data_source_handlers
 
     def start(self, specific_handler_name: str = None) -> NoReturn:
-        logger.info("started receiver")
+        logger.debug("started receiver")
         if specific_handler_name:
             self.data_handlers.get(specific_handler_name).stop()
         for data_handler in self.data_handlers.values():
