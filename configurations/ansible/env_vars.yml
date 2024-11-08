@@ -1,3 +1,5 @@
-APP_CONFIG_PATH: configurations/app.yml
-ENV: development
-LOG_CONFIG_PATH: configurations/logger.yml
+project_folder: "/home/yahav/marsifier"
+deployment_folder: "{{ project_folder }}/deployment"
+venv_folder: "{{ project_folder }}/myenv"
+requirements_file: "{{ deployment_folder }}/requirements.txt"
+service_file: "{{ deployment_folder }}/mars.service"
