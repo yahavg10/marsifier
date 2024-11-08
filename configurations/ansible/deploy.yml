@@ -36,7 +36,7 @@
 
       - name: Install project requirements in venv
         pip:
-          requirements: '/home/yahav/marsifier/deployment/requirements.txt/requirements.txt'
+          requirements: '/home/yahav/marsifier/deployment/requirements.txt'
           virtualenv: '/home/yahav/marsifier/myenv'
           virtualenv_python: python3
 
