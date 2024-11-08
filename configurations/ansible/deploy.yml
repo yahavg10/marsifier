@@ -50,6 +50,7 @@
         copy:
           src: "{{ service_file }}"
           dest: "{{ service_file }}"
+          remote_src: yes
           mode: '0755'
 
       - name: Reload systemd
