@@ -34,8 +34,8 @@
         args:
           creates: /home/yahav/marsifier/myenv/bin/activate
 
-      - name: Install requirements in virtual environment
-        command: /home/yahav/marsifier/myenv/bin/pip install -r /home/yahav/marsifier/deployment/requirements.txt
+      - name: Start the virtual env
+        command: source /home/yahav/marsifier/env/bin/activate
 
       - name: Install requirements
         pip:
