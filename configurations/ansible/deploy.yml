@@ -34,9 +34,15 @@
         args:
           creates: /home/yahav/marsifier/myenv/bin/activate
 
-      - name: "Install python packages with the local instance of pip"
-          shell: "/home/yahav/marsifier/myenv/bin/pip3 install /home/yahav/marsifier/deployment/requirements.txt"
-          become: no
+      - name: Install project requirements in venv
+        pip:
+          requirements: '/home/yahav/marsifier/deployment/requirements.txt/requirements.txt'
+          virtualenv: '/home/yahav/marsifier/myenv'
+          virtualenv_python: python3
+
+#      - name: "Install python packages with the local instance of pip"
+#        shell: "/home/yahav/marsifier/myenv/bin/pip3 install /home/yahav/marsifier/deployment/requirements.txt"
+#          become: no
 
 #      - name: Install requirements
 #        pip:
