@@ -16,14 +16,14 @@
 
       - name: Clone repository if not present
         git:
-          repo: "https://yahavg10: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@github.com/yahavg10/marsifier.git"
+          repo: "https://yahavg10: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@github.com/yahavg10/marsifier.git"
           dest: /home/yahav/marsifier
           version: main
           update: no
 
       - name: Pull latest changes from main branch
         git:
-          repo: "https://yahavg10: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@github.com/yahavg10/marsifier.git"
+          repo: "https://yahavg10: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@github.com/yahavg10/marsifier.git"
           dest: /home/yahav/marsifier
           version: main
           update: yes
