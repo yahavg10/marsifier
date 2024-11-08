@@ -34,13 +34,14 @@
         args:
           creates: /home/yahav/marsifier/myenv/bin/activate
 
-      - name: Start the virtual env
-        shell: source /home/yahav/marsifier/myenv/bin/activate
+      - name: "Install python packages with the local instance of pip"
+          shell: "/home/yahav/marsifier/myenv/bin/pip3 install /home/yahav/marsifier/deployment/requirements.txt"
+          become: no
 
-      - name: Install requirements
-        pip:
-          requirements: /home/yahav/marsifier/deployment/requirements.txt
-          executable: pip3
+#      - name: Install requirements
+#        pip:
+#          requirements: /home/yahav/marsifier/deployment/requirements.txt
+#          executable: pip3
 
       - name: Copy service file
         copy:
