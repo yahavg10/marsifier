@@ -3,7 +3,13 @@
     hosts: all
     become: yes
     vars_files:
-      - env_vars.yml         
+      - env_vars.yml
+
+    environment:
+      APP_CONFIG_PATH: configurations/app.yml
+      ENV: development
+      LOG_CONFIG_PATH: configurations/logger.yml
+
     tasks:
       - name: Ensure required packages are installed
         apt:
@@ -18,41 +24,32 @@
       - name: Clone repository if not present
         git:
           repo: "https://yahavg10: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@github.com/yahavg10/marsifier.git"
-          dest: /home/yahav/marsifier
+          dest: "{{ project_folder }}"
           version: main
           update: no
 
       - name: Pull latest changes from main branch
         git:
           repo: "https://yahavg10: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@github.com/yahavg10/marsifier.git"
-          dest: /home/yahav/marsifier
+          dest: "{{ project_folder }}"
           version: main
           update: yes
 
       - name: Create virtual environment
-        command: python3 -m venv /home/yahav/marsifier/myenv
+        command: python3 -m venv {{ venv_folder }}
         args:
-          creates: /home/yahav/marsifier/myenv/bin/activate
+          creates: "{{ venv_folder }}/bin/activate"
 
       - name: Install project requirements in venv
         pip:
-          requirements: '/home/yahav/marsifier/deployment/requirements.txt'
-          virtualenv: '/home/yahav/marsifier/myenv'
+          requirements: '{{ requirements_file }}'
+          virtualenv: '{{ venv_folder }}'
           virtualenv_python: python3
-
-#      - name: "Install python packages with the local instance of pip"
-#        shell: "/home/yahav/marsifier/myenv/bin/pip3 install /home/yahav/marsifier/deployment/requirements.txt"
-#          become: no
-
-#      - name: Install requirements
-#        pip:
-#          requirements: /home/yahav/marsifier/deployment/requirements.txt
-#          executable: pip3
 
       - name: Copy service file
         copy:
-          src: /home/yahav/marsifier/deployment/mars.service
-          dest: /etc/systemd/system/deployment/mars.service
+          src: "{{ service_file }}"
+          dest: "{{ service_file }}"
           mode: '0755'
 
       - name: Reload systemd
