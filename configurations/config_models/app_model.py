@@ -4,7 +4,8 @@ from typing import Type, Dict, Any
 
 from pydantic.types import T
 
-logger = logging.getLogger(name="finals_logger")
+from src.utils.annotations import Service
+
 
 
 @dataclass
@@ -20,13 +21,13 @@ class Singleton:
         super().__init__(*args, **kwargs)
 
 
+@Service
 @dataclass
 class AppConfig(Singleton):
     receivers: Dict[str, Any]
     databases: Dict[str, Any]
     sender: Dict[str, Any]
     pipeline: Dict[str, Any]
-    pool: Dict[str, Any]
 
     @staticmethod
     def from_dict(data: dict, cls: Type[T]) -> Type[T]:

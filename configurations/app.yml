@@ -5,27 +5,27 @@ receivers:
       model_path: "src.receiver.data_sources_handlers.file_handler"
     conf:
       folder_to_monitor: "C:/Users/nadav/Desktop/all_images"
+      file_age_limit: 1 # in minutes
 
 databases:
+  directory: "src/database/databases_handlers"
   types:
     redis:
       host: '20.54.253.55'
       port: 6379
       db: 0
-  directory: "src/database/databases_handlers"
+      expiry: 60
 
 
 sender:
   file_invoker:
-    endpoint: "http://4.180.218.18:8000/merge-files/"
-    folder_path: "C:/Users/nadav/Desktop/all_images"
-    method: "POST"
-    suffixes: [ "_a.jpg", "_b" ]
+    endpoint: "http://172.17.64.1:8000/merge-files/"
+    #    endpoint: "http://4.180.218.18:8000/merge-files/"
+    params:
+      folder_path: "C:/Users/nadav/Desktop/all_images"
+      suffixes: [ "_a.jpg", "_b" ]
 
 pipeline:
-  folder_path: "/home/yahav/images"
-  expiry_delay: 60
-
-pool:
-  max_workers: 500
-  handling_way: "multithread"
+  folder_path: "C:/Users/nadav/Desktop/all_images"
+  config_module: "configurations.developer_config"
+  steps_module: "src.pipeline_runner.pipeline_utils"

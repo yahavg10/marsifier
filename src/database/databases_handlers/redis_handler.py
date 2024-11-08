@@ -1,49 +1,36 @@
 import logging
-from typing import Any, Dict
+import os
+from typing import NoReturn
 
-import redis
+from redis import Redis
 
-prod_logger = logging.getLogger("production")
-dev_logger = logging.getLogger("development")
+from configurations.developer_config import SerializableType
+from src.database.database_template import AbstractDbTemplate
 
-instance_mutable_data = {}
-
-
-def get_instance_connection():
-    if not hasattr(get_instance_connection, "_instance"):
-        get_instance_connection.instance = redis.Redis(**instance_mutable_data)
-    return get_instance_connection.instance
+logger = logging.getLogger(os.getenv("ENV"))
 
 
-def setup(config: Dict[str, Any]):
-    instance_mutable_data["host"] = config["host"]
-    instance_mutable_data["port"] = config["port"]
-    instance_mutable_data["db"] = config["db"]
+class RedisHandler(AbstractDbTemplate):
+    def __init__(self, host: str, port: int, db: int, expiry: int):
+        self.redis = Redis(
+            host=host,
+            port=port,
+            db=db
+        )
+        self.expiry = expiry
 
+    def write(self, **kwargs) -> NoReturn:
+        try:
+            self.redis.setex(kwargs["key"], self.expiry, kwargs["value"])
+        except Exception as e:
+            logger.error(str(e))
 
-def connect():
-    get_instance_connection()
+    def fetch(self, key: str) -> str:
+        return self.redis.get(key)
 
+    def exists(self, key: SerializableType) -> bool:
+        return self.redis.exists(key)
 
-def disconnect():
-    get_instance_connection().close()
-
-
-write = lambda kwargs: (get_instance_connection().setex(kwargs["key"], kwargs["expiry"], kwargs["value"]))
-
-
-# def write(**kwargs):
-#     try:
-#         get_instance_connection().setex(kwargs["key"], kwargs["expiry"], kwargs["value"])
-#     except Exception as e:
-#         dev_logger.warning(str(e))
-#     dev_logger.debug(f"Stored {kwargs['value']} in Redis with key {kwargs['key']}")
-
-
-def fetch(key: str) -> str:
-    return get_instance_connection().get(key)
-
-
-def delete(key: str):
-    get_instance_connection().delete(key)
-    dev_logger.info(f"Deleted Redis key {key}")
+    def delete(self, key: str):
+        self.redis.delete(key)
+        logger.info(f"Deleted Redis key {key}")

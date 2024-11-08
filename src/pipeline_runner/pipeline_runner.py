@@ -1,10 +1,21 @@
 import importlib
-from typing import List, Callable, Dict, Any
+import logging
+import os
 from functools import reduce
+from typing import List, Callable, Dict, Any, NoReturn
+
+from injector import singleton
+
+from configurations.developer_config import container
+from src.utils.annotations import Service
+
+logger = logging.getLogger(os.getenv("ENV"))
 
 
+@singleton
+@Service
 class PipelineRunner:
-    def __init__(self, config_module: str, steps_module: str):
+    def __init__(self, config_module: str, steps_module: str) -> NoReturn:
         self.config_module = config_module
         self.steps_module = steps_module
         self.steps = self.load_steps()
@@ -24,13 +35,14 @@ class PipelineRunner:
             func = self.step_functions[step_name]
             config = step.get('config', None)
             try:
-                print(f"Running {step_name}")
+                if hasattr(func, "_is_inject") and getattr(func, "_is_inject"):
+                    func = container.get_service(func.__name__)
                 if config:
                     return func(accumulated_data, config)
                 else:
                     return func(accumulated_data)
             except Exception as e:
-                print(f"Error in {step_name}: {e}")
-                raise
+                logger.debug(f"Error in {step_name}: {e}")
+                raise Exception
 
-        print(reduce(iterator, self.steps, data))
+        reduce(iterator, self.steps, data)

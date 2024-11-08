@@ -1,0 +1,3 @@
+APP_CONFIG_PATH: configurations/app.yml
+ENV: development
+LOG_CONFIG_PATH: configurations/logger.yml

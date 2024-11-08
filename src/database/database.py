@@ -1,62 +1,74 @@
 import logging
+import os
+from typing import NoReturn
 
 from injector import singleton
 
-from src.utils.annotations import Service
-from src.utils.function_utils import object_functions_getter
+from configurations.config_models.app_model import AppConfig
+from configurations.developer_config import SerializableType
+from src.utils.annotations import Service, Inject
+from src.utils.function_utils import object_classes_getter
 
-prod_logger = logging.getLogger("production")
-dev_logger = logging.getLogger("development")
+logger = logging.getLogger(os.getenv("ENV"))
 
 
 @singleton
 @Service
 class DataBase:
-    def __init__(self, databases_directory):
-        self.databases = object_functions_getter(databases_directory)
 
-    def setup_all_databases(self, databases_config):
-        for db_name, db in self.databases.items():
-            db.get("setup")(databases_config[db_name.replace("_handler", "")])
+    def __init__(self, databases_directory: str) -> NoReturn:
+        self.databases = {}
+        self.databases_directory = databases_directory
 
-    def connect(self, database_name=None):
+    @Inject("AppConfig")
+    def setup_all_databases(self, app_config: AppConfig) -> NoReturn:
+        self.databases = object_classes_getter(config=app_config.databases,
+                                               directory=self.databases_directory)
+
+    def fetch(self, key: SerializableType, database_name: str = None) -> SerializableType:
         db = self.databases.get(database_name) if database_name else None
         if db:
-            db.get("connect")()
+            return db.fetch(key)
         else:
-            dev_logger.error(f"Database '{database_name}' not found.")
-        if not db:
-            for db in self.databases.values():
-                db.get("connect")()
-
-    def disconnect(self, database_name=None):
-        db = self.databases.get(database_name) if database_name else None
-        if db:
-            db.get("disconnect")()
-        else:
-            dev_logger.error(f"Database '{database_name}' not found.")
-        if not db:
-            for db in self.databases.values():
-                db.get("disconnect")()
-
-    def fetch(self, key, database_name=None):
-        db = self.databases.get(database_name) if database_name else None
-        if db:
-            db.get("fetch")(key)
-        else:
-            dev_logger.error(f"Database '{database_name}' not found.")
-        if not db:
+            logger.debug(f"Database '{database_name}' not found.")
+        if not database_name:
             all_data = {}
-            for db_name, db in self.databases.items():
-                all_data[db_name] = db.get("fetch")(key)
+            for name, db in self.databases.items():
+                all_data[name] = db.fetch(key)
             return all_data
 
-    def write(self, database_name=None, **kwargs):
+    def write(self, database_name: str = None, **kwargs) -> NoReturn:
+        self.setup_all_databases()
         db = self.databases.get(database_name) if database_name else None
         if db:
-            db.get("write")(kwargs)
+            db.write(**kwargs)
         else:
-            dev_logger.error(f"Database '{database_name}' not found.")
+            logger.debug(f"Database '{database_name}' not found.")
+        if not database_name:
+            for db in self.databases.values():
+                db.write(**kwargs)
+
+    def delete(self, key: SerializableType, database_name=None) -> NoReturn:
+        self.setup_all_databases()
+        db = self.databases.get(database_name) if database_name else None
+        if db:
+            db.delete(key)
+        else:
+            logger.debug(f"Database '{database_name}' not found.")
         if not database_name:
             for db_name, db in self.databases.items():
-                db.get("write")(kwargs[db_name.replace("_handler", "")])
+                db.delete(key)
+
+    def exists(self, key: SerializableType, database_name=None) -> bool:
+        self.setup_all_databases()
+        db = self.databases.get(database_name) if database_name else None
+        if db:
+            return db.exists(key)
+        else:
+            logger.debug(f"Database '{database_name}' not found.")
+        if not database_name:
+            for db_name, db in self.databases.items():
+                pass
+                if db.exists(key):
+                    return True
+        return False

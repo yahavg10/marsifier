@@ -1,6 +1,6 @@
 import logging.config as log
 import os
-from typing import Callable
+from typing import Callable, NoReturn
 
 import yaml
 
@@ -14,7 +14,7 @@ def load_configuration(config_model: AppConfig, load_conf_fn: Callable):
     return configuration
 
 
-def setup_logger():
+def setup_logger() -> NoReturn:
     with open(file=os.environ["LOG_CONFIG_PATH"]) as config_file:
         config = yaml.safe_load(config_file.read())
     log.dictConfig(config)
