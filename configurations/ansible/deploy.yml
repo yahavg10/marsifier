@@ -35,7 +35,7 @@
           creates: /home/yahav/marsifier/myenv/bin/activate
 
       - name: Start the virtual env
-        command: source /home/yahav/marsifier/env/bin/activate
+        command: source /home/yahav/marsifier/myenv/bin/activate
 
       - name: Install requirements
         pip:
