@@ -2,7 +2,6 @@ import logging
 import os
 from typing import Dict, NoReturn
 
-from injector import singleton
 
 from src.receiver.data_sources_handlers.data_source_handler import DataSourceHandler
 from src.utils.annotations import Service
@@ -10,7 +9,6 @@ from src.utils.annotations import Service
 logger = logging.getLogger(os.getenv("ENV"))
 
 
-@singleton
 @Service
 class Receiver:
     def __init__(self, data_source_handlers: Dict[str, DataSourceHandler]) -> NoReturn:

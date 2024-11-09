@@ -4,15 +4,12 @@ import os
 from functools import reduce
 from typing import List, Callable, Dict, Any, NoReturn
 
-from injector import singleton
-
 from configurations.developer_config import container
 from src.utils.annotations import Service
 
 logger = logging.getLogger(os.getenv("ENV"))
 
 
-@singleton
 @Service
 class PipelineRunner:
     def __init__(self, config_module: str, steps_module: str) -> NoReturn:

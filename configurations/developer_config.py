@@ -14,14 +14,7 @@ SerializableType = Union[
     Dict[str, "SerializableType"]
 ]
 
-
-database_functions_template = ("get_instance_connection", "setup",
-                               "connect", "disconnect",
-                               "write", "fetch", "delete", "exists")
-
-
 default_send_fn = requests.post
-
 
 pipeline_steps = [
     {
