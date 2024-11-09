@@ -34,6 +34,7 @@
           dest: "{{ project_folder }}"
           version: main
           update: yes
+          force: true
 
       - name: Create virtual environment
         command: python3 -m venv {{ venv_folder }}
