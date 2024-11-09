@@ -2,7 +2,6 @@ import logging
 import os
 from typing import NoReturn
 
-from injector import singleton
 
 from configurations.config_models.app_model import AppConfig
 from configurations.developer_config import SerializableType
@@ -12,7 +11,6 @@ from src.utils.function_utils import object_classes_getter
 logger = logging.getLogger(os.getenv("ENV"))
 
 
-@singleton
 @Service
 class DataBase:
 
