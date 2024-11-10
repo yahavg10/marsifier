@@ -184,25 +184,25 @@ marsifier/
 ## Design Patterns
 
 ### Inversion of Control (IoC)
-```
+
 Pattern Type: Structural
 
-Description: Inversion of Control (IoC) is a design principle in which the control of objects or portions of a program is transferred to a container or framework. In this project, IoC is implemented using a container that manages the lifecycle and dependencies of services and components.
+#### Description: Inversion of Control (IoC) is a design principle in which the control of objects or portions of a program is transferred to a container or framework. In this project, IoC is implemented using a container that manages the lifecycle and dependencies of services and components.
 
 Instead of manually creating and managing instances of classes, IoC relies on a central container to handle the instantiation, initialization, and dependency resolution for services. This leads to loose coupling and makes the system easier to test and maintain.
 
-How it works:
+#### How it works:
 
 Services are registered with a container, which is responsible for instantiating them and resolving any dependencies they might have.
 Dependencies for services are injected automatically via decorators like @Inject or through constructor injection when a service is created.
 When a function or class requires a service, the container resolves the service, injects its dependencies, and calls the function or method.
-Implementation:
+#### Implementation:
 
 A central Container class holds a registry of services and their dependencies.
 Services can be registered manually or automatically (e.g., through a decorator).
 The container can then resolve these dependencies when required.
 Example:
-```
+
 
 
 ```python
@@ -219,11 +219,11 @@ class Container:
 container = Container()
 ```
 
-```
-Dependency Injection (DI)
+
+### Dependency Injection (DI)
 Pattern Type: Structural
 
-Description: The Dependency Injection pattern is used throughout the project to manage class dependencies and reduce tight coupling between components. DI is employed through a service container, which automatically injects the necessary dependencies into classes and functions.
+#### Description: The Dependency Injection pattern is used throughout the project to manage class dependencies and reduce tight coupling between components. DI is employed through a service container, which automatically injects the necessary dependencies into classes and functions.
 
 #### Implementation:
 
@@ -232,7 +232,7 @@ Services are automatically injected into class methods or standalone
  functions via decorators (@Inject).
 Allows for easier testing and configuration of services.
 Example:
-```
+
 ```python
 class MyService:
     @Inject("Database")
@@ -240,19 +240,19 @@ class MyService:
         # database is injected automatically
         pass
 ```
-### Factory Pattern
-```
 
-Pattern Type: Creational
+### Factory Pattern
+
+#### Pattern Type: Creational
 
 Description: The Factory Pattern is used to create different objects based on a configuration, especially for services or handlers. This pattern ensures that object creation is encapsulated and centralized, making the system extensible.
 
-Implementation:
+#### Implementation:
 
 Factory functions or classes are used to generate objects with varying configurations or behaviors.
 Factories provide a unified interface for creating objects.
 Example:
-```
+
 ```python
 
 class PoolFactory:
