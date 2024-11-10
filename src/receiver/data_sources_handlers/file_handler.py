@@ -9,7 +9,6 @@ from watchdog.observers import Observer
 
 from configurations.developer_config import container, strategy_pool
 from src.pipeline_runner.pipeline_runner import PipelineRunner
-from src.pipeline_runner.pipeline_utils import delete_old_files
 from src.receiver.data_sources_handlers.data_source_handler import DataSourceHandler
 from src.utils.annotations import Inject
 
@@ -24,13 +23,14 @@ class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
         self.file_age_limit = file_age_limit
         self.observer = Observer()
         self.observer.schedule(self, folder_to_monitor, recursive=False)
-        scan_existing_files = container.get_service("scan_existing_files")
-        scan_existing_files()
-        # Timer(file_age_limit, delete_old_files).start()
         atexit.register(self.stop)
 
     def start(self) -> NoReturn:
         try:
+            scan_existing_files = container.get_service("scan_existing_files")
+            delete_old_files = container.get_service("delete_old_files")
+            scan_existing_files()
+            Timer(self.file_age_limit, delete_old_files).start()
             self.observer.start()
             self.observer.join()
         except KeyboardInterrupt:
