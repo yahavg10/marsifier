@@ -7,7 +7,7 @@
 
     environment:
       APP_CONFIG_PATH: configurations/app.yml
-      ENV: development
+      ENV: production
       LOG_CONFIG_PATH: configurations/logger.yml
 
     tasks:
