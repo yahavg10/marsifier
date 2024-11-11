@@ -39,7 +39,7 @@ def import_dynamic_model(class_model_config: str) -> Any:
             f" in module {class_model_config['model_name']}")
         raise e
     except Exception as e:
-        logger.debug(e)
+        logger.info(e)
         raise e
 
 
