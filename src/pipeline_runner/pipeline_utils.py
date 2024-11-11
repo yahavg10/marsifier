@@ -106,7 +106,6 @@ def process_by_existence(app_config, database, send_fn, common_name: str) -> NoR
         send_fn(common_name, "file_invoker")
         delete_all_united_files(common_name=common_name, app_config=app_config)
     else:
-        logger.info("writing to db")
         database.write(
             database_name="redis",
             key=common_name,
