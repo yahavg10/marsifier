@@ -16,11 +16,11 @@ logger = logging.getLogger(name=os.getenv("ENV"))
 def send(app_config: AppConfig, common_name: str, sender_type: str, payload_fn=file_invoker,
          send_method: Callable = default_send_fn) -> NoReturn:
     try:
-        logger.info("sending to server...")
         app_config.sender[sender_type]["params"]["common_name"] = common_name
         payload = payload_fn(**app_config.sender[sender_type]["params"])
         logger.info(payload)
         response = send_method(app_config.sender[sender_type]["endpoint"], files=payload)
         logger.info(response.json())
+        logger.error(response.json())
     except RequestException as e:
         logger.warning(f"Error during request: {str(e)}")
