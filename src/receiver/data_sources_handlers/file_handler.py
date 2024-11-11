@@ -48,5 +48,6 @@ class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
 
     @Inject("PipelineRunner")
     def on_created(self, pipeline: PipelineRunner, event) -> NoReturn:
+        logger.info(f"got {event}")
         strategy_pool.pool.submit(pipeline.run_pipeline,
                                   data=event.src_path)
