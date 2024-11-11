@@ -96,17 +96,18 @@ def acquire_lock(lock: threading.Lock):
 
 @Inject("AppConfig", "DataBase", "send")
 def process_by_existence(app_config, database, send_fn, common_name: str) -> NoReturn:
+    exists_in_db = 0
     with acquire_lock(db_lock) as acquired:
         if not acquired:
             logger.warning("Could not acquire lock. Retrying might be necessary.")
-
         exists_in_db = database.exists(database_name="redis", key=common_name)
-        if exists_in_db != 0:
-            send_fn(common_name, "file_invoker")
-            delete_all_united_files(common_name=common_name, app_config=app_config)
-        else:
-            database.write(
-                database_name="redis",
-                key=common_name,
-                value=f"{app_config.pipeline['folder_path']}/{common_name}",
-            )
+
+    if exists_in_db != 0:
+        send_fn(common_name, "file_invoker")
+        delete_all_united_files(common_name=common_name, app_config=app_config)
+    else:
+        database.write(
+            database_name="redis",
+            key=common_name,
+            value=f"{app_config.pipeline['folder_path']}/{common_name}",
+        )

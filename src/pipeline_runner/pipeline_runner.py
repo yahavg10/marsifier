@@ -32,6 +32,7 @@ class PipelineRunner:
             func = self.step_functions[step_name]
             config = step.get('config', None)
             try:
+                logger.info(f"running {step_name}")
                 if hasattr(func, "_is_inject") and getattr(func, "_is_inject"):
                     func = container.get_service(func.__name__)
                 if config:
@@ -39,7 +40,7 @@ class PipelineRunner:
                 else:
                     return func(accumulated_data)
             except Exception as e:
-                logger.debug(f"Error in {step_name}: {e}")
+                logger.info(f"Error in {step_name}: {e}")
                 raise Exception
 
         reduce(iterator, self.steps, data)

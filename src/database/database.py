@@ -28,7 +28,7 @@ class DataBase:
         if db:
             return db.fetch(key)
         else:
-            logger.debug(f"Database '{database_name}' not found.")
+            logger.exception(f"Database '{database_name}' not found.")
         if not database_name:
             all_data = {}
             for name, db in self.databases.items():
@@ -41,7 +41,7 @@ class DataBase:
         if db:
             db.write(**kwargs)
         else:
-            logger.debug(f"Database '{database_name}' not found.")
+            logger.exception(f"Database '{database_name}' not found.")
         if not database_name:
             for db in self.databases.values():
                 db.write(**kwargs)
@@ -52,7 +52,7 @@ class DataBase:
         if db:
             db.delete(key)
         else:
-            logger.debug(f"Database '{database_name}' not found.")
+            logger.exception(f"Database '{database_name}' not found.")
         if not database_name:
             for db_name, db in self.databases.items():
                 db.delete(key)
@@ -63,7 +63,7 @@ class DataBase:
         if db:
             return db.exists(key)
         else:
-            logger.debug(f"Database '{database_name}' not found.")
+            logger.exception(f"Database '{database_name}' not found.")
         if not database_name:
             for db_name, db in self.databases.items():
                 pass
