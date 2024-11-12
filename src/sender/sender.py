@@ -1,7 +1,10 @@
+import io
 import logging
 import os
+import re
 from typing import NoReturn, Callable
 
+from PIL import Image
 from requests import RequestException
 
 from configurations.config_models.app_model import AppConfig
@@ -18,9 +21,7 @@ def send(app_config: AppConfig, common_name: str, sender_type: str, payload_fn=f
     try:
         app_config.sender[sender_type]["params"]["common_name"] = common_name
         payload = payload_fn(**app_config.sender[sender_type]["params"])
-        logger.info(payload)
         response = send_method(app_config.sender[sender_type]["endpoint"], files=payload)
-        logger.info(response.json())
-        logger.error(response.json())
+        logger.info(response)
     except RequestException as e:
         logger.warning(f"Error during request: {str(e)}")
