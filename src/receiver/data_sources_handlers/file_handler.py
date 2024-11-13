@@ -4,7 +4,7 @@ import os
 from threading import Timer
 from typing import NoReturn
 
-from watchdog.events import FileSystemEventHandler
+from watchdog.events import FileSystemEventHandler, FileSystemEvent
 from watchdog.observers import Observer
 
 from configurations.developer_config import container, strategy_pool
@@ -46,7 +46,10 @@ class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
             self.observer.join()
             logger.info("Observer has been shut down cleanly.")
 
-    @Inject("PipelineRunner")
-    def on_closed(self, pipeline: PipelineRunner, event) -> NoReturn:
-        strategy_pool.pool.submit(pipeline.run_pipeline,
-                                  data=event.src_path)
+    # @Inject("PipelineRunner")
+    # def on_closed(self, pipeline: PipelineRunner, event) -> NoReturn:
+    #     strategy_pool.pool.submit(pipeline.run_pipeline,
+    #                               data=event.src_path)
+
+    def on_any_event(self, event: FileSystemEvent) -> None:
+        logger.error(event.event_type)
