@@ -3,7 +3,6 @@ import logging
 import os
 from typing import NoReturn, Callable
 
-import requests
 from PIL import Image
 from fastapi import UploadFile
 from requests import RequestException
@@ -32,6 +31,7 @@ def send(app_config: AppConfig, common_name: str, sender_type: str, payload_fn=f
     try:
         app_config.sender[sender_type]["params"]["common_name"] = common_name
         payload = payload_fn(**app_config.sender[sender_type]["params"])
+        print(f"the payload is {payload}")
         response = send_method(app_config.sender[sender_type]["endpoint"], files=payload)
         # response = send_method(app_config.sender[sender_type]["endpoint"], files=payload)
         logger.info(response)
