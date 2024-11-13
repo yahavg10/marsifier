@@ -20,7 +20,7 @@ databases:
 
 sender:
   file_invoker:
-    endpoint: "http://172.17.64.1:8000/merge-files/"
+    endpoint: "http://172.17.64.1:7180/merge-files/"
 #    endpoint: "http://4.180.218.18:8000/merge-files/"
     params:
       folder_path: "C:/Users/nadav/Desktop/all_images"
