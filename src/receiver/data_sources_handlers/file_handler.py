@@ -30,7 +30,7 @@ class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
             scan_existing_files = container.get_service("scan_existing_files")
             delete_old_files = container.get_service("delete_old_files")
             scan_existing_files()
-            # Timer(self.file_age_limit, delete_old_files).start()
+            Timer(self.file_age_limit, delete_old_files).start()
             self.observer.start()
             self.observer.join()
         except KeyboardInterrupt:
@@ -47,6 +47,6 @@ class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
             logger.info("Observer has been shut down cleanly.")
 
     @Inject("PipelineRunner")
-    def on_created(self, pipeline: PipelineRunner, event) -> NoReturn:
+    def on_closed(self, pipeline: PipelineRunner, event) -> NoReturn:
         strategy_pool.pool.submit(pipeline.run_pipeline,
                                   data=event.src_path)

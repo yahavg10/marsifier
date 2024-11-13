@@ -41,6 +41,19 @@
         args:
           creates: "{{ venv_folder }}/bin/activate"
 
+
+      - name: Set environment variables in virtual environment
+        ansible.builtin.lineinfile:
+          path: "{{ venv_folder }}/bin/activate"
+          line: 'export {{ item.key }}="{{ item.value }}"'
+          create: yes
+        with_items:
+          - { key: "APP_CONFIG_PATH", value: "configurations/app.yml" }
+          - { key: "ENV", value: "production" }
+          - { key: "LOG_CONFIG_PATH", value: "configurations/logger.yml" }
+        tags: setup_env
+
+
       - name: Install project requirements in venv
         pip:
           requirements: '{{ requirements_file }}'
