@@ -3,7 +3,6 @@ import logging
 import os
 from typing import NoReturn, Callable
 
-import requests
 from PIL import Image
 from fastapi import UploadFile
 from requests import RequestException
