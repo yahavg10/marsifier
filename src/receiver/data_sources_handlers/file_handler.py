@@ -29,7 +29,7 @@ class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
         try:
             scan_existing_files = container.get_service("scan_existing_files")
             delete_old_files = container.get_service("delete_old_files")
-            scan_existing_files()
+            strategy_pool.submit(scan_existing_files)
             Timer(self.file_age_limit, delete_old_files).start()
             self.observer.start()
             self.observer.join()
