@@ -2,7 +2,6 @@ import logging
 import os
 from typing import NoReturn
 
-
 from configurations.config_models.app_model import AppConfig
 from configurations.developer_config import SerializableType
 from src.utils.annotations import Service, Inject

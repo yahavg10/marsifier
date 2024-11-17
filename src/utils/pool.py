@@ -16,8 +16,10 @@ class PoolFactory:
     def create_pool_strategy(pool_type: str, max_workers: int) -> PoolStrategy:
         if pool_type == "multiprocess":
             return ProcessPoolStrategy(max_workers)
-        else:
+        if pool_type == "multithread":
             return ThreadPoolStrategy(max_workers)
+        else:
+            raise ValueError
 
 
 class ThreadPoolStrategy(PoolStrategy):
