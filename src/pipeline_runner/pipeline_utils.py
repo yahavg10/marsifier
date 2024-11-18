@@ -30,9 +30,14 @@ def delete_all_united_files(common_name: str, app_config: AppConfig) -> NoReturn
     suffixes = app_config.sender["file_invoker"]["params"]["suffixes"]
     file_path = app_config.receivers['file']['conf']['folder_to_monitor'] + "/" + common_name
 
-    for suffix in suffixes:
-        if os.path.exists(file_path + suffix):
-            os.remove(file_path + suffix) and delete_from_db(common_name, suffix)
+    try:
+        for suffix in suffixes:
+            if os.path.exists(file_path + suffix):
+                os.remove(file_path + suffix)
+                delete_from_db(common_name, suffix)
+    except Exception as e:
+        logger.exception(str(e))
+        raise e
 
 
 @Inject("AppConfig")
