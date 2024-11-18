@@ -48,5 +48,6 @@ class FileDataSourceHandler(DataSourceHandler, FileSystemEventHandler):
 
     @Inject("PipelineRunner")
     def on_closed(self, pipeline: PipelineRunner, event) -> NoReturn:
+        logger.info("new file received")
         strategy_pool.pool.submit(pipeline.run_pipeline,
                                   data=event.src_path)

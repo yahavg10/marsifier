@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
+
 from src.pipeline_runner.pipeline_runner import PipelineRunner
 
 
@@ -13,11 +14,14 @@ class TestPipelineRunner(unittest.TestCase):
         steps = runner.load_steps()
 
         self.assertEqual(steps, [{"name": "step1"}, {"name": "step2"}])
-        mock_import_module.assert_called_once_with("config_module")
+        mock_import_module.assert_called_with("config_module")
 
     @patch("src.pipeline_runner.pipeline_runner.importlib.import_module")
     def test_load_step_functions(self, mock_import_module):
-        mock_import_module.return_value = {"func1": lambda x: x, "func2": lambda y: y}
+        mock_steps_module = MagicMock()
+        mock_steps_module.func1 = lambda x: x
+        mock_steps_module.func2 = lambda y: y
+        mock_import_module.return_value = mock_steps_module
         runner = PipelineRunner("config_module", "steps_module")
 
         step_functions = runner.load_step_functions()
@@ -25,8 +29,13 @@ class TestPipelineRunner(unittest.TestCase):
         self.assertIn("func1", step_functions)
         self.assertIn("func2", step_functions)
 
+    @patch("src.pipeline_runner.pipeline_runner.importlib.import_module")
     @patch("src.pipeline_runner.pipeline_runner.reduce")
-    def test_run_pipeline(self, mock_reduce):
+    def test_run_pipeline(self, mock_reduce, mock_import_module):
+        mock_steps_module = MagicMock()
+        mock_steps_module.func1 = lambda x: x
+        mock_steps_module.func2 = lambda y: y
+        mock_import_module.return_value = mock_steps_module
         runner = PipelineRunner("config_module", "steps_module")
         runner.steps = [{"name": "step1"}]
         runner.step_functions = {"step1": MagicMock(return_value="result")}

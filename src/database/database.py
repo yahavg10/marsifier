@@ -35,7 +35,6 @@ class DataBase:
             return all_data
 
     def write(self, database_name: str = None, **kwargs) -> NoReturn:
-        self.setup_all_databases()
         db = self.databases.get(database_name) if database_name else None
         if db:
             db.write(**kwargs)
@@ -46,7 +45,6 @@ class DataBase:
                 db.write(**kwargs)
 
     def delete(self, key: SerializableType, database_name=None) -> NoReturn:
-        self.setup_all_databases()
         db = self.databases.get(database_name) if database_name else None
         if db:
             db.delete(key)
@@ -57,7 +55,6 @@ class DataBase:
                 db.delete(key)
 
     def exists(self, key: SerializableType, database_name=None) -> bool:
-        self.setup_all_databases()
         db = self.databases.get(database_name) if database_name else None
         if db:
             return db.exists(key)
