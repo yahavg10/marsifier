@@ -11,7 +11,7 @@ databases:
   directory: "src/database/databases_handlers"
   types:
     redis:
-      host: '20.54.253.55'
+      host: '108.143.191.251'
       port: 6379
       db: 0
       expiry: 60
