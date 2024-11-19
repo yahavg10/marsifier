@@ -7,7 +7,7 @@ from typing import List
 from typing import NoReturn
 
 from configurations.config_models.app_model import AppConfig
-from configurations.developer_config import strategy_pool
+from configurations.developer_config import strategy_pool, container
 from src.database.database import DataBase
 from src.pipeline_runner.pipeline_runner import PipelineRunner
 from src.utils.annotations import Inject
@@ -19,8 +19,8 @@ logger = logging.getLogger(os.getenv("ENV"))
 @Inject("DataBase")
 def delete_from_db(database: DataBase, common_name: str, suffix: str, database_name: str = None) -> NoReturn:
     try:
-        database.fetch(common_name) and database.delete(key=common_name,
-                                                        database_name=database_name)
+        database.fetch(common_name)
+        database.delete(key=common_name, database_name=database_name)
         logger.info(f"Cleaned up {common_name + suffix}")
     except Exception as e:
         logger.warning(f"Error cleaning up files: {str(e)}")
@@ -29,12 +29,13 @@ def delete_from_db(database: DataBase, common_name: str, suffix: str, database_n
 def delete_all_united_files(common_name: str, app_config: AppConfig) -> NoReturn:
     suffixes = app_config.sender["file_invoker"]["params"]["suffixes"]
     file_path = app_config.receivers['file']['conf']['folder_to_monitor'] + "/" + common_name
+    erase_from_db = container.get_service("delete_from_db")
 
     try:
         for suffix in suffixes:
             if os.path.exists(file_path + suffix):
                 os.remove(file_path + suffix)
-                delete_from_db(common_name, suffix)
+                erase_from_db(common_name, suffix)
     except Exception as e:
         logger.exception(str(e))
         raise e
@@ -84,7 +85,7 @@ def scan_existing_files(app_config: AppConfig, pipeline: PipelineRunner) -> NoRe
 
     for valid_file in valid_files:
         file_path = os.path.join(folder_path, valid_file).replace("\\", "/")
-        logger.info(f"Processing file: {os.path.basename(file_path)}")
+        logger.info("new file received")
         strategy_pool.pool.submit(pipeline.run_pipeline,
                                   data=file_path)
 
