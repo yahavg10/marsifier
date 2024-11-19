@@ -23,10 +23,11 @@ class DataBase:
                                                directory=self.databases_directory)
 
     def fetch(self, key: SerializableType, database_name: str = None) -> SerializableType:
+        # self.setup_all_databases()
         db = self.databases.get(database_name) if database_name else None
         if db:
             return db.fetch(key)
-        else:
+        elif database_name is not None:
             logger.exception(f"Database '{database_name}' not found.")
         if not database_name:
             all_data = {}
@@ -35,30 +36,33 @@ class DataBase:
             return all_data
 
     def write(self, database_name: str = None, **kwargs) -> NoReturn:
+        # self.setup_all_databases()
         db = self.databases.get(database_name) if database_name else None
         if db:
             db.write(**kwargs)
-        else:
+        elif database_name is not None:
             logger.exception(f"Database '{database_name}' not found.")
         if not database_name:
             for db in self.databases.values():
                 db.write(**kwargs)
 
     def delete(self, key: SerializableType, database_name=None) -> NoReturn:
+        # self.setup_all_databases()
         db = self.databases.get(database_name) if database_name else None
         if db:
             db.delete(key)
-        else:
+        elif database_name is not None:
             logger.exception(f"Database '{database_name}' not found.")
         if not database_name:
             for db_name, db in self.databases.items():
                 db.delete(key)
 
     def exists(self, key: SerializableType, database_name=None) -> bool:
+        # self.setup_all_databases()
         db = self.databases.get(database_name) if database_name else None
         if db:
             return db.exists(key)
-        else:
+        elif database_name is not None:
             logger.exception(f"Database '{database_name}' not found.")
         if not database_name:
             for db_name, db in self.databases.items():
