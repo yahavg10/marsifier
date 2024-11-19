@@ -4,7 +4,7 @@ receivers:
       model_name: "FileDataSourceHandler"
       model_path: "src.receiver.data_sources_handlers.file_handler"
     conf:
-      folder_to_monitor: "C:/Users/nadav/Desktop/all_images"
+      folder_to_monitor: "/home/yahav/images"
       file_age_limit: 100 # in minutes
 
 databases:
@@ -21,10 +21,10 @@ sender:
   file_invoker:
     endpoint: "http://4.180.218.18:8000/merge-files/"
     params:
-      folder_path: "C:/Users/nadav/Desktop/all_images"
+      folder_path: "/home/yahav/images"
       suffixes: [ "_a.jpg", "_b" ]
 
 pipeline:
-  folder_path: "C:/Users/nadav/Desktop/all_images"
+  folder_path: "/home/yahav/images"
   config_module: "configurations.developer_config"
   steps_module: "src.pipeline_runner.pipeline_utils"
