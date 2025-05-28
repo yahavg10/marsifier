@@ -6,48 +6,69 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 
 
-class S3Processor:
-    def __init__(self, region, source_bucket, target_bucket, redis_host, redis_port):
-        self.region = region
+class S3Client:
+    def __init__(self, region, source_bucket, target_bucket):
         self.source_bucket = source_bucket
         self.target_bucket = target_bucket
+        self.client = self._init_s3_client(region)
 
-        # Initialize AWS and Redis clients
-        self.s3_client = self._init_s3_client()
-        self.redis_client = self._init_redis_client(redis_host, redis_port)
-
-        # Configuration for processing
-        self.max_file_threads = 20  # Threads per page for file processing
-        self.redis_key_prefix = "processed:"
-
-    def _init_s3_client(self):
+    def _init_s3_client(self, region):
         """Initialize the S3 client with transfer acceleration."""
         return boto3.client(
             "s3",
-            region_name=self.region,
+            region_name=region,
             config=Config(s3={"use_accelerate_endpoint": True}),
         )
 
-    def _init_redis_client(self, host, port):
-        """Initialize the Redis client."""
-        return redis.StrictRedis(host=host, port=port, decode_responses=True)
+    def list_pages(self, prefix):
+        """List pages of files from the S3 bucket."""
+        paginator = self.client.get_paginator("list_objects_v2")
+        operation_parameters = {"Bucket": self.source_bucket, "Prefix": prefix}
 
-    def file_already_processed(self, s3_key):
-        """Check Redis to see if a file has already been processed."""
-        return self.redis_client.exists(f"{self.redis_key_prefix}{s3_key}")
-
-    def mark_file_processed(self, s3_key):
-        """Mark a file as processed in Redis."""
-        self.redis_client.set(f"{self.redis_key_prefix}{s3_key}", "1")
-
-    def fetch_file_from_s3(self, s3_key):
-        """Fetch file from S3 and return its content as a stream."""
         try:
-            response = self.s3_client.get_object(Bucket=self.source_bucket, Key=s3_key)
+            return paginator.paginate(**operation_parameters)
+        except ClientError as e:
+            print(f"Error listing pages: {e}")
+            return []
+
+    def fetch_file(self, s3_key):
+        """Fetch a file from S3."""
+        try:
+            response = self.client.get_object(Bucket=self.source_bucket, Key=s3_key)
             return response["Body"]
         except ClientError as e:
             print(f"Error fetching file {s3_key} from S3: {e}")
             return None
+
+    def upload_file(self, s3_key, content):
+        """Upload a file to the target S3 bucket."""
+        try:
+            self.client.put_object(
+                Bucket=self.target_bucket, Key=s3_key, Body=content
+            )
+            print(f"File uploaded successfully: {s3_key}")
+        except ClientError as e:
+            print(f"Error uploading file {s3_key} to target S3 bucket: {e}")
+
+
+class RedisCache:
+    def __init__(self, host, port):
+        self.client = redis.StrictRedis(host=host, port=port, decode_responses=True)
+        self.key_prefix = "processed:"
+
+    def is_processed(self, s3_key):
+        """Check if a file is already processed."""
+        return self.client.exists(f"{self.key_prefix}{s3_key}")
+
+    def mark_processed(self, s3_key):
+        """Mark a file as processed."""
+        self.client.set(f"{self.key_prefix}{s3_key}", "1")
+
+
+class FileProcessor:
+    def __init__(self, s3_client, redis_cache):
+        self.s3_client = s3_client
+        self.redis_cache = redis_cache
 
     def decrypt_content(self, file_stream):
         """Simulate decryption of the file content."""
@@ -56,30 +77,26 @@ class S3Processor:
             decrypted_content += chunk  # Replace with actual decryption logic
         return decrypted_content
 
-    def upload_to_target_s3(self, s3_key, content):
-        """Upload decrypted content to the target S3 bucket."""
-        try:
-            self.s3_client.put_object(
-                Bucket=self.target_bucket, Key=s3_key, Body=content
-            )
-            print(f"File uploaded successfully: {s3_key}")
-        except ClientError as e:
-            print(f"Error uploading file {s3_key} to target S3 bucket: {e}")
-
     def process_file(self, s3_key):
         """Fetch, decrypt, and upload a file."""
-        if self.file_already_processed(s3_key):
+        if self.redis_cache.is_processed(s3_key):
             print(f"File already processed: {s3_key}")
             return
 
         print(f"Processing file: {s3_key}")
-        file_stream = self.fetch_file_from_s3(s3_key)
+        file_stream = self.s3_client.fetch_file(s3_key)
         if not file_stream:
             return
 
         decrypted_content = self.decrypt_content(file_stream)
-        self.upload_to_target_s3(s3_key, decrypted_content)
-        self.mark_file_processed(s3_key)
+        self.s3_client.upload_file(s3_key, decrypted_content)
+        self.redis_cache.mark_processed(s3_key)
+
+
+class PageProcessor:
+    def __init__(self, file_processor, max_file_threads):
+        self.file_processor = file_processor
+        self.max_file_threads = max_file_threads
 
     def process_page(self, page):
         """Process all files in a page using threads."""
@@ -90,34 +107,34 @@ class S3Processor:
             future_to_key = {}
             for obj in page["Contents"]:
                 s3_key = obj["Key"]
-                future_to_key[executor.submit(self.process_file, s3_key)] = s3_key
+                future_to_key[executor.submit(self.file_processor.process_file, s3_key)] = s3_key
 
-            # Wait for all threads in this page to complete
             for future in as_completed(future_to_key):
                 try:
                     future.result()
                 except Exception as exc:
-                    print(f"Error in thread for file {future_to_key[future]}: {exc}")
+                    print(f"Error processing file {future_to_key[future]}: {exc}")
 
-    def list_pages(self, prefix):
-        """List pages of files from the S3 bucket."""
-        operation_parameters = {"Bucket": self.source_bucket, "Prefix": prefix}
 
-        try:
-            paginator = self.s3_client.get_paginator("list_objects_v2")
-            page_iterator = paginator.paginate(**operation_parameters)
+class Orchestrator:
+    def __init__(self, region, source_bucket, target_bucket, redis_host, redis_port, prefix):
+        self.s3_client = S3Client(region, source_bucket, target_bucket)
+        self.redis_cache = RedisCache(redis_host, redis_port)
+        self.file_processor = FileProcessor(self.s3_client, self.redis_cache)
+        self.page_processor = PageProcessor(self.file_processor, max_file_threads=20)
+        self.prefix = prefix
 
-            for page in page_iterator:
-                self.process_page(page)
-
-        except ClientError as e:
-            print(f"S3 Pagination error: {e}")
+    def process_pages(self):
+        """List and process pages from S3."""
+        pages = self.s3_client.list_pages(self.prefix)
+        for page in pages:
+            self.page_processor.process_page(page)
 
 
 def list_and_process_pages(region, source_bucket, target_bucket, redis_host, redis_port, prefix):
-    """Create an S3Processor and process pages in a separate process."""
-    processor = S3Processor(region, source_bucket, target_bucket, redis_host, redis_port)
-    processor.list_pages(prefix)
+    """Start the orchestrator in a separate process."""
+    orchestrator = Orchestrator(region, source_bucket, target_bucket, redis_host, redis_port, prefix)
+    orchestrator.process_pages()
 
 
 def main():
