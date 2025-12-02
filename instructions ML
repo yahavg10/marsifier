@@ -13,4 +13,21 @@ Quick notes & how to use
   "change_no_2":"Deleted dests: [dest1]",
   "change_no_3":"Updates dests: [dest0]"
 }
+{
+  "project": "ptl100",
+  "overall_behavior_score": 0.83,
+  "analysis": {
+    "intensity": "High activity in a short time window — suggests a restructuring phase.",
+    "risk": "Low operational risk. Mix of additions and removals appears intentional and consistent with past behavior.",
+    "pattern_similarity": "This update resembles 14 past change events from this project involving multi-destination adjustments.",
+    "anomalies": "No unusual patterns detected. Delete/update frequency is within historical norms.",
+    "forecast": "Expected follow-up changes in the next 24–48 hours based on previous behavior sequences.",
+    "human_summary": "The project is undergoing a coordinated update: destinations are being reorganized in a way that matches previous structured maintenance cycles. Nothing appears urgent or risky."
+  },
+  "per_change_interpretation": {
+    "Change No.1": "Adding dest2 and dest3 fits the historical pattern of expanding output routes.",
+    "Change No.2": "Deleting dest1 continues a trend where legacy or low-traffic destinations are removed.",
+    "Change No.3": "Updating dest0 aligns with recurring adjustments the project typically performs after adding new destinations."
+  }
+}
 Response contains a human-friendly explanation plus pluggable ML outputs.
