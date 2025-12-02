@@ -1,0 +1,15 @@
+Quick notes & how to use
+	•	Start Mongo with collections:
+	•	operations_log documents should include at least {"project": str, "operation": "add|delete|update", "timestamp": datetime, "project_size": int}.
+	•	projects documents can include {"project": str, "destinations": [...]} to compute project size.
+	•	Place pre-trained models in MODEL_DIR:
+	•	anomaly.joblib — trained IsolationForest compatible with the feature vector [hour,weekday,project_size,adds,deletes,updates]
+	•	nextop.joblib — trained classifier predicting operation labels from same vector
+	•	If models are missing, the service trains quick fallback models from existing operations_log.
+	•	Call with POST /analyze and your payload (example):
+{
+  "project": "ptl100",
+  "change_no_1":"Added destinations: [dest2, dest3]",
+  "change_no_2":"Deleted dests: [dest1]",
+  "change_no_3":"Updates dests: [dest0]"
+}
