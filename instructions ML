@@ -13,3 +13,4 @@ Quick notes & how to use
   "change_no_2":"Deleted dests: [dest1]",
   "change_no_3":"Updates dests: [dest0]"
 }
+Response contains a human-friendly explanation plus pluggable ML outputs.
